@@ -1,0 +1,280 @@
+/* ======================================================================
+   GALLO · Servicio Mecánico — Sistema de diseño
+   Estética: vintage garage / automotor retro
+   Navy profundo · crema · rojo insignia · dorado ala
+   ====================================================================== */
+
+/* ---------- Tokens ---------- */
+:root{
+  --navy-900:#0B0F17;
+  --navy-800:#10151F;
+  --navy-700:#151C29;
+  --navy-600:#1B2434;
+  --navy-500:#232E42;
+  --line:rgba(201,154,91,.22);      /* hairline dorada */
+  --line-soft:rgba(237,227,204,.10);
+
+  --cream:#EDE3CC;
+  --cream-dim:#C6C1B2;
+  --cream-mute:rgba(237,227,204,.55);
+
+  --red:#C1352B;
+  --red-bright:#D8422F;
+  --red-deep:#9E2A22;
+
+  --gold:#C99A5B;
+  --gold-bright:#DDB176;
+
+  --wa:#25D366;
+  --wa-dark:#1DAE55;
+
+  --shadow-lg:0 24px 60px -20px rgba(0,0,0,.7);
+  --shadow-md:0 12px 30px -12px rgba(0,0,0,.6);
+
+  --maxw:1180px;
+  --radius:4px;
+}
+
+/* ---------- Reset ---------- */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Barlow',system-ui,sans-serif;
+  color:var(--cream);
+  background:var(--navy-800);
+  line-height:1.6;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;display:block}
+a{color:inherit}
+
+/* Grano/textura sutil global */
+body::before{
+  content:"";
+  position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- Tipografía ---------- */
+.display{font-family:'Staatliches',sans-serif;font-weight:400;letter-spacing:.5px;line-height:.95;text-transform:uppercase}
+.script{font-family:'Kaushan Script',cursive;font-weight:400}
+.cond{font-family:'Barlow Condensed',sans-serif}
+
+h1,h2,h3{font-family:'Staatliches',sans-serif;font-weight:400;line-height:.98;text-transform:uppercase;letter-spacing:.4px;color:var(--cream)}
+
+.eyebrow{
+  font-family:'Barlow Condensed',sans-serif;
+  text-transform:uppercase;letter-spacing:3.5px;font-weight:600;
+  font-size:14px;color:var(--gold-bright);
+  display:inline-flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"";width:26px;height:2px;background:var(--red);display:inline-block}
+
+/* ---------- Layout ---------- */
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;width:100%}
+section{position:relative}
+.section-pad{padding:96px 0}
+.center{text-align:center}
+
+/* ---------- Botones ---------- */
+.btn{
+  display:inline-flex;align-items:center;gap:9px;
+  font-family:'Barlow Condensed',sans-serif;
+  text-transform:uppercase;letter-spacing:1.5px;font-weight:600;font-size:16px;
+  padding:13px 26px;border-radius:var(--radius);text-decoration:none;
+  border:1.5px solid transparent;cursor:pointer;transition:.18s ease;
+  white-space:nowrap;
+}
+.btn-red{background:var(--red);color:#fff}
+.btn-red:hover{background:var(--red-bright);transform:translateY(-1px)}
+.btn-wa{background:var(--wa);color:#08240f}
+.btn-wa:hover{background:var(--wa-dark);color:#fff;transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--cream);border-color:rgba(237,227,204,.28)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold-bright)}
+.btn-gold{background:var(--gold);color:var(--navy-900)}
+.btn-gold:hover{background:var(--gold-bright)}
+.btn svg{width:18px;height:18px;flex-shrink:0}
+
+/* ---------- Nav ---------- */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  transition:background .3s,box-shadow .3s,border-color .3s;
+  background:linear-gradient(180deg,rgba(11,15,23,.85),rgba(11,15,23,0));
+  border-bottom:1px solid transparent;
+}
+.nav.scrolled{
+  background:rgba(11,15,23,.96);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  box-shadow:0 8px 30px -18px #000;
+}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;gap:20px;height:74px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;flex-shrink:0}
+.brand img{height:46px;width:46px;object-fit:cover;border-radius:50%;border:2px solid var(--gold);box-shadow:0 0 0 2px var(--navy-900)}
+.brand-txt{display:flex;flex-direction:column;line-height:1}
+.brand-txt b{font-family:'Staatliches',sans-serif;font-size:22px;letter-spacing:1.5px;color:var(--cream)}
+.brand-txt span{font-family:'Barlow Condensed',sans-serif;font-size:10.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold-bright);font-weight:600}
+.nav-links{display:flex;align-items:center;gap:30px}
+.nav-links a{
+  text-decoration:none;color:var(--cream-dim);
+  font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;
+  letter-spacing:1.5px;font-weight:600;font-size:16px;transition:color .18s;position:relative;
+}
+.nav-links a::after{content:"";position:absolute;left:0;bottom:-6px;height:2px;width:0;background:var(--red);transition:width .22s}
+.nav-links a:hover{color:var(--cream)}
+.nav-links a:hover::after,.nav-links a.active::after{width:100%}
+.nav-links a.active{color:var(--cream)}
+.nav-cta{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.nav-toggle{display:none;background:none;border:0;cursor:pointer;padding:6px}
+.nav-toggle span{display:block;width:26px;height:2px;background:var(--cream);margin:5px 0;transition:.25s}
+
+@media(max-width:900px){
+  .nav-links{
+    position:fixed;inset:74px 0 auto 0;flex-direction:column;gap:0;
+    background:rgba(11,15,23,.98);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+    max-height:0;overflow:hidden;transition:max-height .3s ease;
+  }
+  .nav-links.open{max-height:340px}
+  .nav-links a{padding:16px 24px;width:100%;border-bottom:1px solid var(--line-soft);font-size:19px}
+  .nav-toggle{display:block}
+  .nav-cta .btn{display:none}
+}
+
+/* ---------- Winged badge (SVG usa currentColor) ---------- */
+.badge-wing{color:var(--gold)}
+
+/* ---------- Hero ---------- */
+.hero{
+  min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;
+  background:radial-gradient(120% 90% at 70% 10%,#1b2436 0%,var(--navy-800) 45%,var(--navy-900) 100%);
+}
+.hero-grid-lines{
+  position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(var(--line-soft) 1px,transparent 1px),linear-gradient(90deg,var(--line-soft) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(70% 60% at 30% 40%,#000,transparent 80%);
+}
+.hero-accent{position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,transparent,var(--red) 15%,var(--gold) 85%,transparent)}
+.hero-content{position:relative;z-index:3;padding:120px 0 70px}
+.hero h1{font-size:clamp(52px,9vw,120px);color:var(--cream);text-shadow:0 3px 0 rgba(0,0,0,.25)}
+.hero h1 .accent{color:var(--red-bright)}
+.hero .lead{max-width:540px;color:var(--cream-mute);font-size:clamp(17px,2vw,20px);margin:22px 0 34px;line-height:1.55}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap}
+.hero-badge-deco{
+  position:absolute;right:-40px;top:50%;transform:translateY(-50%);
+  width:min(46vw,560px);opacity:.13;z-index:1;color:var(--gold);pointer-events:none;
+}
+@media(max-width:760px){.hero-badge-deco{display:none}}
+
+/* ---------- Stat strip ---------- */
+.stats{background:var(--navy-900);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr)}
+.stat{padding:36px 20px;text-align:center;border-right:1px solid var(--line-soft)}
+.stat:last-child{border-right:0}
+.stat b{display:block;font-family:'Staatliches',sans-serif;font-size:46px;color:var(--gold-bright);line-height:1}
+.stat span{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:2px;font-size:14px;color:var(--cream-dim);font-weight:600}
+@media(max-width:720px){.stats-grid{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:0}.stat{border-bottom:1px solid var(--line-soft)}}
+
+/* ---------- Section heading ---------- */
+.sec-head{max-width:720px;margin-bottom:56px}
+.sec-head.center{margin-left:auto;margin-right:auto}
+.sec-head h2{font-size:clamp(38px,5.5vw,64px);margin:16px 0 14px}
+.sec-head p{color:var(--cream-mute);font-size:18px}
+
+/* ---------- Cards de servicio ---------- */
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:900px){.svc-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.svc-grid{grid-template-columns:1fr}}
+.svc{
+  background:linear-gradient(180deg,var(--navy-700),var(--navy-800));
+  border:1px solid var(--line);border-radius:var(--radius);padding:30px 26px;
+  transition:.2s;position:relative;overflow:hidden;
+}
+.svc::before{content:"";position:absolute;left:0;top:0;height:3px;width:0;background:var(--red);transition:width .3s}
+.svc:hover{transform:translateY(-4px);border-color:var(--gold);box-shadow:var(--shadow-md)}
+.svc:hover::before{width:100%}
+.svc-ico{width:52px;height:52px;display:grid;place-items:center;border:1.5px solid var(--gold);border-radius:50%;color:var(--gold-bright);margin-bottom:18px}
+.svc-ico svg{width:26px;height:26px}
+.svc h3{font-size:26px;margin-bottom:8px}
+.svc p{color:var(--cream-mute);font-size:15.5px}
+
+/* ---------- Lista de servicios (chips) ---------- */
+.svc-chips{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.chip{
+  font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:1.2px;
+  font-weight:600;font-size:16px;color:var(--cream);
+  background:var(--navy-700);border:1px solid var(--line);border-radius:100px;
+  padding:9px 20px;transition:.18s;
+}
+.chip:hover{background:var(--red);border-color:var(--red);color:#fff}
+
+/* ---------- Split (nosotros) ---------- */
+.split{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+@media(max-width:860px){.split{grid-template-columns:1fr;gap:32px}}
+.split-media{position:relative}
+.split-media img{border-radius:var(--radius);border:1px solid var(--line);box-shadow:var(--shadow-lg)}
+.split-media .frame{position:absolute;inset:-14px -14px auto auto;width:70%;height:70%;border:2px solid var(--gold);border-radius:var(--radius);z-index:-1}
+.split h2{font-size:clamp(34px,5vw,56px);margin-bottom:18px}
+.split p{color:var(--cream-mute);margin-bottom:16px;font-size:17px}
+.split ul{list-style:none;display:grid;gap:12px;margin:22px 0}
+.split li{display:flex;gap:12px;align-items:flex-start;color:var(--cream-dim)}
+.split li svg{width:22px;height:22px;color:var(--gold-bright);flex-shrink:0;margin-top:2px}
+
+/* ---------- Franja CTA ---------- */
+.cta-strip{background:linear-gradient(120deg,var(--red-deep),var(--red));position:relative;overflow:hidden}
+.cta-strip::after{content:"";position:absolute;inset:0;background-image:linear-gradient(90deg,rgba(0,0,0,.15) 1px,transparent 1px);background-size:36px 100%;opacity:.4}
+.cta-strip .wrap{display:flex;align-items:center;justify-content:space-between;gap:28px;padding:52px 24px;flex-wrap:wrap;position:relative;z-index:1}
+.cta-strip h2{color:#fff;font-size:clamp(30px,4.5vw,48px)}
+.cta-strip p{color:rgba(255,255,255,.85);margin-top:6px}
+
+/* ---------- Franja medios de pago ---------- */
+.pay{background:var(--navy-900);border-top:1px solid var(--line)}
+.pay .wrap{display:flex;align-items:center;justify-content:center;gap:40px;padding:40px 24px;flex-wrap:wrap;text-align:center}
+.pay .script{color:var(--gold-bright);font-size:32px}
+
+/* ---------- Footer ---------- */
+.footer{background:var(--navy-900);border-top:1px solid var(--line);padding:64px 0 28px}
+.footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px}
+@media(max-width:760px){.footer-grid{grid-template-columns:1fr;gap:32px}}
+.footer h4{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:2px;font-size:15px;color:var(--gold-bright);margin-bottom:16px;font-weight:600}
+.footer a{color:var(--cream-dim);text-decoration:none;transition:color .18s;display:block;margin-bottom:9px}
+.footer a:hover{color:var(--cream)}
+.footer p{color:var(--cream-mute);margin-bottom:9px}
+.footer-brand img{height:56px;width:56px;border-radius:50%;border:2px solid var(--gold);margin-bottom:14px}
+.footer-bottom{border-top:1px solid var(--line-soft);margin-top:44px;padding-top:22px;text-align:center;color:var(--cream-mute);font-size:14px}
+.footer-bottom a{display:inline;color:var(--gold-bright)}
+
+/* ---------- WhatsApp flotante ---------- */
+.wa-float{
+  position:fixed;right:22px;bottom:22px;z-index:200;
+  width:58px;height:58px;border-radius:50%;background:var(--wa);
+  display:grid;place-items:center;box-shadow:0 8px 24px rgba(37,211,102,.45);
+  animation:waPulse 2.4s infinite;
+}
+.wa-float svg{width:30px;height:30px;color:#fff}
+@keyframes waPulse{
+  0%{box-shadow:0 8px 24px rgba(37,211,102,.5),0 0 0 0 rgba(37,211,102,.5)}
+  70%{box-shadow:0 8px 24px rgba(37,211,102,.4),0 0 0 16px rgba(37,211,102,0)}
+  100%{box-shadow:0 8px 24px rgba(37,211,102,.5),0 0 0 0 rgba(37,211,102,0)}
+}
+
+/* ---------- Mini hero (páginas internas) ---------- */
+.mini-hero{
+  padding:150px 0 70px;position:relative;overflow:hidden;
+  background:radial-gradient(100% 120% at 80% 0%,#1b2436,var(--navy-900));
+  border-bottom:1px solid var(--line);
+}
+.mini-hero h1{font-size:clamp(44px,7vw,86px);color:var(--cream)}
+.mini-hero .crumb{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:2px;color:var(--cream-mute);font-size:14px;margin-top:14px}
+.mini-hero .crumb a{color:var(--gold-bright);text-decoration:none}
+
+/* ---------- Reveal on scroll ---------- */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+
+/* ---------- Utilidades ---------- */
+.bg-800{background:var(--navy-800)}
+.bg-900{background:var(--navy-900)}
+.bg-700{background:var(--navy-700)}

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Administración | Gallo Servicio Mecánico</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="assets/logo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Staatliches&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  .admin-top{position:sticky;top:0;z-index:50;background:rgba(11,15,23,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .admin-top .wrap{display:flex;align-items:center;justify-content:space-between;height:70px;gap:16px}
+  .admin-top .brand b{font-family:'Staatliches';font-size:22px;letter-spacing:1.5px}
+  .btn.sm{padding:8px 14px;font-size:13px}
+  .muted{color:var(--cream-mute)}
+
+  /* Login */
+  #login-view{min-height:calc(100vh - 70px);display:flex;align-items:center;justify-content:center;padding:40px 24px}
+  .login-card{width:100%;max-width:400px;background:var(--navy-700);border:1px solid var(--line);border-radius:var(--radius);padding:40px 34px;box-shadow:var(--shadow-lg)}
+  .login-card img{height:64px;width:64px;border-radius:50%;border:2px solid var(--gold);margin:0 auto 18px;display:block}
+  .login-card h1{font-size:32px;text-align:center;margin-bottom:6px}
+  .login-card p.sub{text-align:center;color:var(--cream-mute);margin-bottom:26px;font-size:14px}
+
+  label{display:block;font-family:'Barlow Condensed';text-transform:uppercase;letter-spacing:1.5px;font-size:13px;color:var(--gold-bright);font-weight:600;margin:14px 0 6px}
+  input[type=text],input[type=email],input[type=password],input[type=number],textarea{
+    width:100%;padding:12px 14px;background:var(--navy-900);border:1px solid var(--line);
+    border-radius:var(--radius);color:var(--cream);font-family:'Barlow';font-size:15px;outline:none;transition:border-color .18s;
+  }
+  input:focus,textarea:focus{border-color:var(--gold)}
+  textarea{resize:vertical;min-height:90px}
+  .msg{color:#ff8f7d;font-size:14px;margin-top:12px;min-height:18px}
+
+  /* Dashboard */
+  #dash-view{display:none;padding:40px 0 80px}
+  .dash-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:30px;flex-wrap:wrap}
+  .dash-head h1{font-size:40px}
+
+  .prow{display:grid;grid-template-columns:70px 1fr auto;gap:18px;align-items:center;background:var(--navy-700);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+  .prow img{width:70px;height:70px;object-fit:cover;border-radius:var(--radius);background:var(--navy-900)}
+  .prow-info b{font-family:'Staatliches';font-size:22px;letter-spacing:.5px;display:block}
+  .prow-info span{color:var(--gold-bright);font-family:'Barlow Condensed';letter-spacing:1px;font-size:14px}
+  .prow-info p{color:var(--cream-mute);font-size:14px;margin-top:4px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  .prow-actions{display:flex;gap:8px}
+  @media(max-width:620px){.prow{grid-template-columns:56px 1fr}.prow-actions{grid-column:1/-1}.prow img{width:56px;height:56px}}
+
+  /* Modal */
+  #modal{position:fixed;inset:0;z-index:120;background:rgba(6,9,14,.8);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+  #modal.open{display:flex}
+  .modal-card{width:100%;max-width:560px;background:var(--navy-800);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-lg)}
+  .modal-hd{display:flex;align-items:center;justify-content:space-between;padding:22px 26px;border-bottom:1px solid var(--line)}
+  .modal-hd h2{font-size:28px}
+  .modal-hd button{background:none;border:0;color:var(--cream-mute);font-size:24px;cursor:pointer;line-height:1}
+  .modal-bd{padding:26px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:480px){.row2{grid-template-columns:1fr}}
+
+  /* Dropzone imágenes */
+  .imgs-head{display:flex;justify-content:space-between;align-items:center}
+  #thumbs{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+  .thumb{position:relative;width:84px;height:84px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line)}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .thumb button{position:absolute;top:2px;right:2px;width:22px;height:22px;border-radius:50%;border:0;background:rgba(193,53,43,.95);color:#fff;cursor:pointer;font-size:12px;line-height:1}
+  #dropzone{display:flex;align-items:center;justify-content:center;gap:8px;padding:22px;border:1.5px dashed var(--line);border-radius:var(--radius);cursor:pointer;color:var(--cream-mute);transition:.18s}
+  #dropzone:hover{border-color:var(--gold);color:var(--gold-bright)}
+  .save-row{display:flex;align-items:center;gap:16px;margin-top:22px}
+
+  #not-configured{display:none;max-width:640px;margin:60px auto;padding:0 24px;text-align:center}
+  #not-configured .card{background:var(--navy-700);border:1px solid var(--line);border-radius:var(--radius);padding:40px 34px}
+  #not-configured code{background:var(--navy-900);padding:2px 6px;border-radius:3px;color:var(--gold-bright);font-size:13px}
+  #not-configured a{color:var(--gold-bright)}
+</style>
+</head>
+<body>
+
+<header class="admin-top">
+  <div class="wrap">
+    <a href="index.html" class="brand" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+      <img src="assets/logo.jpg" alt="" style="height:40px;width:40px;border-radius:50%;border:2px solid var(--gold)">
+      <b class="display">GALLO · Admin</b>
+    </a>
+    <div style="display:flex;align-items:center;gap:14px">
+      <span class="muted" id="user-email" style="font-size:14px"></span>
+      <a class="btn btn-ghost sm" href="index.html">Ver sitio</a>
+      <button class="btn btn-red sm" id="logout-btn" style="display:none">Salir</button>
+    </div>
+  </div>
+</header>
+
+<!-- Supabase sin configurar -->
+<div id="not-configured">
+  <div class="card">
+    <h1 style="font-size:34px;margin-bottom:14px">Falta configurar Supabase</h1>
+    <p class="muted" style="margin-bottom:16px">Para activar el panel de administración, completá tus credenciales en <code>js/supabase.js</code> y ejecutá el <code>supabase-setup.sql</code>.</p>
+    <p class="muted">Seguí los pasos del <a href="https://supabase.com" target="_blank" rel="noopener">README</a>. Es gratis y toma unos minutos.</p>
+  </div>
+</div>
+
+<!-- Login -->
+<div id="login-view" style="display:none">
+  <form class="login-card" id="login-form">
+    <img src="assets/logo.jpg" alt="Gallo">
+    <h1>Administración</h1>
+    <p class="sub">Ingresá para gestionar los productos</p>
+    <label for="email">Email</label>
+    <input id="email" type="email" autocomplete="username" required>
+    <label for="password">Contraseña</label>
+    <input id="password" type="password" autocomplete="current-password" required>
+    <button class="btn btn-red" id="login-btn" style="width:100%;justify-content:center;margin-top:22px" type="submit">Ingresar</button>
+    <div class="msg" id="login-msg"></div>
+  </form>
+</div>
+
+<!-- Dashboard -->
+<main id="dash-view">
+  <div class="wrap">
+    <div class="dash-head">
+      <div>
+        <span class="eyebrow">Panel</span>
+        <h1>Productos</h1>
+      </div>
+      <button class="btn btn-gold" id="new-btn">+ Nuevo producto</button>
+    </div>
+    <div id="prod-list"></div>
+  </div>
+</main>
+
+<!-- Modal formulario -->
+<div id="modal">
+  <div class="modal-card">
+    <div class="modal-hd">
+      <h2 id="form-title">Nuevo producto</h2>
+      <button id="modal-close" aria-label="Cerrar">✕</button>
+    </div>
+    <form class="modal-bd" id="prod-form">
+      <label for="f-nombre">Nombre *</label>
+      <input id="f-nombre" type="text" required maxlength="120">
+
+      <label for="f-desc">Descripción</label>
+      <textarea id="f-desc" maxlength="600"></textarea>
+
+      <div class="row2">
+        <div>
+          <label for="f-precio">Precio (ARS)</label>
+          <input id="f-precio" type="number" min="0" step="1" placeholder="Dejar vacío = Consultar">
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <p class="muted" style="font-size:13px;padding-top:12px">Si lo dejás vacío se muestra “Consultar”.</p>
+        </div>
+      </div>
+
+      <div class="imgs-head" style="margin-top:16px">
+        <label style="margin:0">Imágenes (hasta 3)</label>
+        <span class="muted" id="img-count" style="font-size:13px">0/3</span>
+      </div>
+      <div id="thumbs"></div>
+      <div id="dropzone">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
+        <span>Agregar imagen</span>
+      </div>
+      <input id="f-files" type="file" accept="image/*" multiple hidden>
+
+      <div class="save-row">
+        <button class="btn btn-red" id="save-btn" type="submit">Guardar producto</button>
+        <div class="msg" id="form-msg" style="margin:0"></div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script type="module" src="js/admin.js"></script>
+</body>
+</html>
