@@ -129,6 +129,8 @@ section{position:relative}
 .nav-toggle{display:none;background:none;border:0;cursor:pointer;padding:6px}
 .nav-toggle span{display:block;width:26px;height:2px;background:var(--cream);margin:5px 0;transition:.25s}
 
+@media(max-width:1080px){.nav-links{gap:20px}}
+
 @media(max-width:900px){
   .nav-links{
     position:fixed;inset:74px 0 auto 0;flex-direction:column;gap:0;
@@ -136,7 +138,7 @@ section{position:relative}
     border-bottom:1px solid var(--line);
     max-height:0;overflow:hidden;transition:max-height .3s ease;
   }
-  .nav-links.open{max-height:340px}
+  .nav-links.open{max-height:440px}
   .nav-links a{padding:16px 24px;width:100%;border-bottom:1px solid var(--line-soft);font-size:19px}
   .nav-toggle{display:block}
   .nav-cta .btn{display:none}
