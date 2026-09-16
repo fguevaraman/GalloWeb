@@ -22,6 +22,50 @@
   .search-box input:focus{border-color:var(--gold)}
   .search-box input::placeholder{color:var(--cream-mute)}
 
+  /* Filtro por categoría, con el mismo look de píldora que el buscador */
+  .filtro{position:relative}
+  .filtro select{
+    appearance:none;cursor:pointer;padding:13px 42px 13px 18px;background:var(--navy-700);
+    border:1px solid var(--line);border-radius:100px;color:var(--cream);
+    font-family:'Barlow',sans-serif;font-size:15px;outline:none;transition:border-color .18s;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d9b478' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 16px center;background-size:16px;
+  }
+  .filtro select:focus{border-color:var(--gold)}
+  .filtro select option{background:var(--navy-800);color:var(--cream)}
+
+  /* Paginador */
+  .pager{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-top:40px}
+  .pager[hidden]{display:none}
+  .pager-info{color:var(--cream-mute);font-size:14.5px}
+  .pager-pages{display:flex;gap:6px;flex-wrap:wrap;order:2}
+  .pager-pages button{
+    min-width:40px;height:40px;padding:0 12px;background:var(--navy-700);border:1px solid var(--line);
+    border-radius:var(--radius);color:var(--cream);font-family:'Barlow Condensed',sans-serif;
+    font-size:16px;font-weight:600;letter-spacing:.5px;cursor:pointer;transition:.18s;
+  }
+  .pager-pages button:hover:not(:disabled){border-color:var(--gold);color:var(--gold-bright)}
+  .pager-pages button[aria-current]{background:var(--gold);border-color:var(--gold);color:var(--navy-900)}
+  /* La página actual está deshabilitada pero tiene que verse encendida:
+     el apagado es solo para las flechas cuando no hay a dónde ir. */
+  .pager-pages button:disabled{cursor:default}
+  .pager-pages button:disabled:not([aria-current]){opacity:.35}
+  .pager-pages .gap{align-self:center;color:var(--cream-mute);padding:0 2px}
+  .pager-size{display:flex;align-items:center;gap:8px;color:var(--cream-mute);font-size:14.5px;order:3}
+  .pager-size select{
+    padding:8px 30px 8px 12px;background:var(--navy-700);border:1px solid var(--line);
+    border-radius:var(--radius);color:var(--cream);font-family:'Barlow',sans-serif;font-size:14.5px;
+    outline:none;cursor:pointer;appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d9b478' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 10px center;background-size:14px;
+  }
+  .pager-size select:focus{border-color:var(--gold)}
+  .pager-size select option{background:var(--navy-800);color:var(--cream)}
+  @media(max-width:560px){.pager{justify-content:center}.pager-info{order:1;width:100%;text-align:center}}
+
+  .p-cat{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:1.6px;
+    font-size:12.5px;font-weight:600;color:var(--gold-bright);margin-bottom:6px}
+
   .p-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:22px}
   .p-card{background:var(--navy-700);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;transition:.2s}
   .p-card:hover{transform:translateY(-4px);border-color:var(--gold);box-shadow:var(--shadow-md)}
@@ -81,11 +125,29 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
         <input id="search" type="search" placeholder="Buscar repuesto o producto...">
       </div>
+      <div class="filtro">
+        <select id="cat-filter" aria-label="Filtrar por categoría">
+          <option value="">Todas las categorías</option>
+        </select>
+      </div>
       <a class="btn btn-ghost" href="https://wa.me/5493416684947?text=Hola%20Gallo!%20Busco%20un%20repuesto." target="_blank" rel="noopener">¿No lo encontrás? Consultá →</a>
     </div>
 
     <div id="grid" class="p-grid"></div>
     <div id="empty">No hay productos que coincidan con tu búsqueda.</div>
+
+    <div class="pager" id="pager" hidden>
+      <span class="pager-info" id="pager-info"></span>
+      <div class="pager-pages" id="pager-pages"></div>
+      <label class="pager-size">
+        Mostrar
+        <select id="per-page">
+          <option value="30">30</option>
+          <option value="50">50</option>
+          <option value="todos">Todos</option>
+        </select>
+      </label>
+    </div>
 
     <p class="note">Sr. Cliente, recuerde que todos los precios están sujetos a modificaciones por aumento en los precios de mercado. Consúltenos antes de dirigirse al local, su consulta no molesta.</p>
   </div>

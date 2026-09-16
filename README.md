@@ -3,7 +3,7 @@
 Sitio institucional + catálogo de productos con **panel de administración** para el taller mecánico **Gallo** (Ituzaingó 371, Rosario).
 
 - **Frontend:** HTML/CSS/JS estático, sin build step.
-- **Datos:** `productos.json` y las imágenes viven **en este repo**. GitHub hace de base de datos.
+- **Datos:** `productos.json`, `categorias.json` y las imágenes viven **en este repo**. GitHub hace de base de datos.
 - **Contraseña del panel:** hasheada en `config/admin.json`, otro archivo del repo. No es una variable de entorno de ningún hosting.
 - **Escritura:** una función chica y portable (`api/`) que commitea los cambios del panel.
 - **Ventas:** catálogo con botón *Consultar por WhatsApp* (sin carrito ni pago online).
@@ -14,6 +14,7 @@ No hay base de datos que mantener, no hay servicio que se pause por inactividad 
 
 ```
 productos.json          ← el catálogo (datos)
+categorias.json         ← las categorías con las que se agrupan los productos
 config/admin.json       ← hash de la contraseña del panel
 assets/productos/       ← imágenes subidas desde el panel
 api/                    ← núcleo portable: (Request, env) -> Response
@@ -35,7 +36,7 @@ tools/hash-password.mjs ← genera/cambia la contraseña
 |---|---|
 | `index.html` | Home institucional (hero, servicios, nosotros, medios de pago) |
 | `servicios.html` | Detalle de todos los servicios del taller |
-| `productos.html` | Catálogo (se carga desde `productos.json`) |
+| `productos.html` | Catálogo: buscador, filtro por categoría y paginado (30 / 50 / todos) |
 | `contacto.html` | Dirección, horarios, WhatsApp y mapa |
 | `admin.html` | Panel de administración (login + alta/edición/baja de productos) |
 
@@ -79,6 +80,25 @@ La clave con la que se firman las sesiones no se configura: sale de `GITHUB_TOKE
 Entrá a `/admin`, poné la contraseña y cargá productos. Al guardar, el panel commitea al repo y el hosting redeploya solo: el cambio se ve en el sitio público en menos de un minuto.
 
 ---
+
+## Categorías
+
+Viven en `categorias.json`, una lista de `id` + `nombre`:
+
+```json
+[
+  { "id": "encendido", "nombre": "Encendido" },
+  { "id": "frenos",    "nombre": "Frenos" }
+]
+```
+
+- El `id` es lo que se guarda en cada producto (`"categoria": "frenos"`) y no debería cambiar: si lo cambiás, los productos que lo usaban quedan sueltos. El `nombre` sí se puede editar cuando quieras, es lo único que se muestra.
+- **Para agregar o sacar una categoría se edita el archivo y se commitea**, igual que la contraseña. El orden del archivo es el orden del combo.
+- El panel arma el desplegable del formulario con este archivo, y el servidor **rechaza** cualquier producto con una categoría que no exista acá.
+- En el catálogo público el filtro muestra solo las categorías que tengan al menos un producto, con el total al lado. Los productos sin categoría (o con una categoría borrada del archivo) caen en **Otros**, así nunca quedan invisibles.
+- La categoría elegida queda en la URL (`productos.html?cat=frenos`), o sea que se puede mandar el link ya filtrado por WhatsApp.
+
+El paginado del catálogo es del lado del navegador: `productos.json` se baja entero una vez y la página lo corta de a 30, 50 o todos. Con cientos de productos sigue siendo un solo archivo chico.
 
 ## Cómo funciona el guardado
 

@@ -9,6 +9,10 @@
 // igual en Netlify, Vercel, Cloudflare Pages, GitHub Pages o Apache.
 export const RUTA_CATALOGO = 'productos.json';
 
+// Las categorías con las que se agrupan los productos. Mismo criterio:
+// archivo del repo, editable a mano o desde el panel.
+export const RUTA_CATEGORIAS = 'categorias.json';
+
 // Endpoint del panel de administración (lo resuelve el adaptador del hosting).
 export const API_ADMIN = '/api/admin';
 
@@ -25,6 +29,26 @@ export async function cargarCatalogo({ sinCache = false } = {}){
   const datos = await respuesta.json();
   return Array.isArray(datos) ? datos : [];
 }
+
+// Trae las categorías. Si el archivo no está o está roto devuelve una lista
+// vacía: el catálogo tiene que seguir funcionando igual, sin filtro.
+export async function cargarCategorias({ sinCache = false } = {}){
+  const url = sinCache ? `${RUTA_CATEGORIAS}?t=${Date.now()}` : RUTA_CATEGORIAS;
+  try{
+    const respuesta = await fetch(url, sinCache ? { cache:'no-store' } : {});
+    if(!respuesta.ok) return [];
+    const datos = await respuesta.json();
+    if(!Array.isArray(datos)) return [];
+    return datos
+      .filter(c => c && typeof c.id === 'string' && typeof c.nombre === 'string')
+      .map(c => ({ id: c.id, nombre: c.nombre }));
+  }catch{
+    return [];
+  }
+}
+
+export const nombreCategoria = (categorias, id) =>
+  categorias.find(c => c.id === id)?.nombre || '';
 
 // Escapa texto antes de meterlo en innerHTML
 export function esc(valor){

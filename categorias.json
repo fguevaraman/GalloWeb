@@ -1,0 +1,12 @@
+[
+  { "id": "encendido",    "nombre": "Encendido" },
+  { "id": "frenos",       "nombre": "Frenos" },
+  { "id": "motor",        "nombre": "Motor" },
+  { "id": "distribucion", "nombre": "Distribución" },
+  { "id": "filtros",      "nombre": "Filtros y lubricantes" },
+  { "id": "electrico",    "nombre": "Eléctrico y baterías" },
+  { "id": "suspension",   "nombre": "Suspensión y dirección" },
+  { "id": "transmision",  "nombre": "Transmisión y embrague" },
+  { "id": "refrigeracion","nombre": "Refrigeración" },
+  { "id": "accesorios",   "nombre": "Accesorios" }
+]

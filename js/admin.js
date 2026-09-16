@@ -6,7 +6,8 @@
 //  escribe en un solo commit, así que nunca queda a medio camino.
 // ============================================================
 
-import { API_ADMIN, cargarCatalogo, formatPrecio, esc, IMAGEN_POR_DEFECTO } from './config.js';
+import { API_ADMIN, cargarCatalogo, cargarCategorias, nombreCategoria,
+         formatPrecio, esc, IMAGEN_POR_DEFECTO } from './config.js';
 
 const $ = s => document.querySelector(s);
 const MAX_IMG    = 3;
@@ -19,6 +20,7 @@ const dashView  = $('#dash-view');
 
 let token     = sessionStorage.getItem(CLAVE_TOKEN) || null;
 let productos = [];        // catálogo completo, en memoria
+let categorias = [];       // las de categorias.json
 let editandoId = null;
 let imagenes  = [];        // del producto abierto: { ruta } o { blob, preview }
 
@@ -81,12 +83,28 @@ async function cargarLista(){
   const lista = $('#prod-list');
   lista.innerHTML = '<p class="muted">Cargando...</p>';
   try{
-    productos = await cargarCatalogo({ sinCache: true });
+    [productos, categorias] = await Promise.all([
+      cargarCatalogo({ sinCache: true }),
+      cargarCategorias({ sinCache: true })
+    ]);
   }catch(err){
     lista.innerHTML = `<p class="muted">No se pudo leer el catálogo: ${esc(err.message)}</p>`;
     return;
   }
+  llenarCombo();
   render();
+}
+
+// El combo del formulario sale siempre de categorias.json.
+function llenarCombo(){
+  const combo = $('#f-categoria');
+  combo.innerHTML = '<option value="">Sin categoría</option>';
+  categorias.forEach(c => {
+    const opcion = document.createElement('option');
+    opcion.value = c.id;
+    opcion.textContent = c.nombre;
+    combo.appendChild(opcion);
+  });
 }
 
 function render(){
@@ -104,7 +122,7 @@ function render(){
       <img src="${esc(imgs[0] || IMAGEN_POR_DEFECTO)}" alt="">
       <div class="prow-info">
         <b>${esc(p.nombre || '(sin nombre)')}</b>
-        <span>${formatPrecio(p.precio)} · ${imgs.length} imagen(es)</span>
+        <span>${formatPrecio(p.precio)} · ${esc(etiquetaCategoria(p))} · ${imgs.length} imagen(es)</span>
         <p>${esc(p.descripcion || '')}</p>
       </div>
       <div class="prow-actions">
@@ -115,6 +133,13 @@ function render(){
     fila.querySelector('[data-del]').addEventListener('click', () => eliminar(p));
     lista.appendChild(fila);
   });
+}
+
+// Un producto puede apuntar a una categoría que después se borró del archivo:
+// se avisa en el listado en vez de hacer de cuenta que no tiene ninguna.
+function etiquetaCategoria(p){
+  if(!p.categoria) return 'Sin categoría';
+  return nombreCategoria(categorias, p.categoria) || `${p.categoria} (no existe)`;
 }
 
 // ---------- Guardado ----------
@@ -166,6 +191,11 @@ function abrirForm(p = null){
   $('#f-nombre').value = p?.nombre || '';
   $('#f-desc').value   = p?.descripcion || '';
   $('#f-precio').value = p?.precio ?? '';
+  // Si la categoría guardada ya no está en el archivo, el combo queda en
+  // "Sin categoría" y al guardar el producto se corrige.
+  const combo = $('#f-categoria');
+  combo.value = p?.categoria || '';
+  if(combo.value !== (p?.categoria || '')) combo.value = '';
   imagenes = (p?.imagenes || []).filter(Boolean)
     .map(ruta => ({ ruta, preview: ruta }));
   renderThumbs();
@@ -256,6 +286,7 @@ $('#prod-form').addEventListener('submit', async (e) => {
     nombre,
     descripcion: $('#f-desc').value.trim(),
     precio: precioCrudo === '' ? null : Number(precioCrudo),
+    categoria: $('#f-categoria').value || null,
     imagenes: imagenes.map(img => img.ruta ?? img)
   };
 

@@ -25,11 +25,15 @@
   .login-card p.sub{text-align:center;color:var(--cream-mute);margin-bottom:26px;font-size:14px}
 
   label{display:block;font-family:'Barlow Condensed';text-transform:uppercase;letter-spacing:1.5px;font-size:13px;color:var(--gold-bright);font-weight:600;margin:14px 0 6px}
-  input[type=text],input[type=email],input[type=password],input[type=number],textarea{
+  input[type=text],input[type=email],input[type=password],input[type=number],textarea,select{
     width:100%;padding:12px 14px;background:var(--navy-900);border:1px solid var(--line);
     border-radius:var(--radius);color:var(--cream);font-family:'Barlow';font-size:15px;outline:none;transition:border-color .18s;
   }
-  input:focus,textarea:focus{border-color:var(--gold)}
+  input:focus,textarea:focus,select:focus{border-color:var(--gold)}
+  select{appearance:none;cursor:pointer;padding-right:38px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c99a5b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 12px center;background-size:16px}
+  select option{background:var(--navy-900);color:var(--cream)}
   textarea{resize:vertical;min-height:90px}
   .msg{color:#ff8f7d;font-size:14px;margin-top:12px;min-height:18px}
 
@@ -138,10 +142,16 @@
           <input id="f-precio" type="number" min="0" step="1" placeholder="Dejar vacío = Consultar">
         </div>
         <div>
-          <label>&nbsp;</label>
-          <p class="muted" style="font-size:13px;padding-top:12px">Si lo dejás vacío se muestra “Consultar”.</p>
+          <label for="f-categoria">Categoría</label>
+          <select id="f-categoria">
+            <option value="">Sin categoría</option>
+          </select>
         </div>
       </div>
+      <p class="muted" style="font-size:13px;margin-top:8px">
+        Si dejás el precio vacío se muestra “Consultar”. Las categorías se editan en
+        <code>categorias.json</code>.
+      </p>
 
       <div class="imgs-head" style="margin-top:16px">
         <label style="margin:0">Imágenes (hasta 3)</label>

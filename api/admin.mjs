@@ -20,6 +20,7 @@ import { credenciales } from './credenciales.mjs';
 import { crearCliente } from './github.mjs';
 
 const RUTA_JSON     = 'productos.json';
+const RUTA_CATEGS   = 'categorias.json';
 const DIR_IMAGENES  = 'assets/productos';
 const MAX_PRODUCTOS = 300;
 const MAX_IMAGENES  = 3;
@@ -68,9 +69,9 @@ function faltaConfig(env){
 // cambiar la contraseña invalida solo las sesiones abiertas.
 const claveSesion = (env, hash) => `${env.GITHUB_TOKEN}|${hash}|sesion-gallo`;
 
-// Convierte lo que mandó el panel en el estado final del catálogo,
-// resolviendo los "nueva:N" a rutas reales dentro del repo.
-function normalizar(productos, archivosEntrantes){
+// categoriasValidas: Set con los id de categorias.json, o null si todavía no
+// existe el archivo (en ese caso no se valida contra nada).
+function normalizar(productos, archivosEntrantes, categoriasValidas){
   if(!Array.isArray(productos)) throw new Error('El catálogo tiene que ser una lista.');
   if(productos.length > MAX_PRODUCTOS) throw new Error(`Máximo ${MAX_PRODUCTOS} productos.`);
 
@@ -87,6 +88,13 @@ function normalizar(productos, archivosEntrantes){
       const numero = Number(precioCrudo);
       if(!Number.isFinite(numero) || numero < 0) throw new Error(`Precio inválido en "${nombre}".`);
       precio = Math.round(numero);
+    }
+
+    // Los id de categoría son slugs: así el archivo se puede editar a mano
+    // sin que un espacio de más rompa el filtro del catálogo.
+    const categoria = texto(producto?.categoria, 64).toLowerCase().replace(/[^a-z0-9-]/g, '');
+    if(categoria && categoriasValidas && !categoriasValidas.has(categoria)){
+      throw new Error(`La categoría de "${nombre}" no existe en ${RUTA_CATEGS}.`);
     }
 
     const entrantes = Array.isArray(producto?.imagenes) ? producto.imagenes : [];
@@ -122,6 +130,7 @@ function normalizar(productos, archivosEntrantes){
       nombre,
       descripcion: texto(producto?.descripcion, 600, { multilinea: true }),
       precio,
+      categoria: categoria || null,
       imagenes
     };
   });
@@ -160,20 +169,40 @@ export async function manejar(request, env){
 
   if(cuerpo.accion !== 'guardar') return error('Acción desconocida.');
 
+  const github = crearCliente(env);
+
+  // El catálogo anterior sirve para detectar imágenes huérfanas; las categorías,
+  // para no dejar entrar productos con una categoría que no existe.
+  let anterior, categorias;
+  try{
+    [anterior, categorias] = await Promise.all([
+      github.leerJson(RUTA_JSON),
+      github.leerJson(RUTA_CATEGS)
+    ]);
+  }catch(err){
+    return error(`No se pudo leer el repositorio: ${err.message}`, 502);
+  }
+
+  const categoriasValidas = Array.isArray(categorias) && categorias.length
+    ? new Set(categorias.map(c => String(c?.id || '')).filter(Boolean))
+    : null;
+
   let normalizado;
   try{
-    normalizado = normalizar(cuerpo.productos, Array.isArray(cuerpo.archivos) ? cuerpo.archivos : []);
+    normalizado = normalizar(
+      cuerpo.productos,
+      Array.isArray(cuerpo.archivos) ? cuerpo.archivos : [],
+      categoriasValidas
+    );
   }catch(err){
     return error(err.message);
   }
 
   const { limpios, imagenesNuevas, usadas } = normalizado;
-  const github = crearCliente(env);
 
   try{
     // Las imágenes que estaban en el catálogo y ya no se usan se borran del repo,
     // así no se acumulan archivos huérfanos. Solo tocamos assets/productos/.
-    const anterior = (await github.leerJson(RUTA_JSON)) || [];
     const huerfanas = new Set();
     for(const producto of (Array.isArray(anterior) ? anterior : [])){
       for(const imagen of (producto?.imagenes || [])){
