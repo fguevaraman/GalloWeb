@@ -6,15 +6,17 @@
 //  a otro host alcanza con escribir un adaptador de pocas líneas
 //  (ver netlify/functions/admin.mjs).
 //
+//  La contraseña no es una variable de entorno: vive hasheada en
+//  config/admin.json, adentro del repo (ver api/credenciales.mjs).
+//
 //  Variables de entorno necesarias:
-//    ADMIN_PASSWORD_HASH  generado con: node tools/hash-password.mjs
-//    SESSION_SECRET       texto largo al azar
-//    GITHUB_TOKEN         token fine-grained, permiso Contents: read & write
-//    GITHUB_REPO          "usuario/repositorio"
-//    GITHUB_BRANCH        opcional, por defecto "main"
+//    GITHUB_TOKEN   token fine-grained, permiso Contents: read & write
+//    GITHUB_REPO    "usuario/repositorio"
+//    GITHUB_BRANCH  opcional, por defecto "main"
 // ============================================================
 
 import { verificarPassword, firmarSesion, verificarSesion } from './auth.mjs';
+import { credenciales } from './credenciales.mjs';
 import { crearCliente } from './github.mjs';
 
 const RUTA_JSON     = 'productos.json';
@@ -56,10 +58,15 @@ function slug(nombre){
 }
 
 function faltaConfig(env){
-  const faltan = ['ADMIN_PASSWORD_HASH','SESSION_SECRET','GITHUB_TOKEN','GITHUB_REPO']
-    .filter(clave => !env[clave]);
+  const faltan = ['GITHUB_TOKEN','GITHUB_REPO'].filter(clave => !env[clave]);
   return faltan.length ? faltan : null;
 }
+
+// La clave con la que se firman las sesiones sale del token de GitHub (que es
+// secreto y ya tiene que estar configurado) más el hash de la contraseña. Así
+// no hay un secreto más para administrar, nada secreto viaja en el repo, y
+// cambiar la contraseña invalida solo las sesiones abiertas.
+const claveSesion = (env, hash) => `${env.GITHUB_TOKEN}|${hash}|sesion-gallo`;
 
 // Convierte lo que mandó el panel en el estado final del catálogo,
 // resolviendo los "nueva:N" a rutas reales dentro del repo.
@@ -133,18 +140,22 @@ export async function manejar(request, env){
   try{ cuerpo = await request.json(); }
   catch{ return error('El cuerpo tiene que ser JSON.'); }
 
+  const admin = await credenciales();
+  if(!admin) return error('Falta config/admin.json o el hash que tiene adentro es inválido. '
+    + 'Generalo con: node tools/hash-password.mjs "tu-contraseña"', 500);
+
   // ---------- Login ----------
   if(cuerpo.accion === 'login'){
-    const ok = await verificarPassword(String(cuerpo.password || ''), env.ADMIN_PASSWORD_HASH);
+    const ok = await verificarPassword(String(cuerpo.password || ''), admin.passwordHash);
     if(!ok) return error('Contraseña incorrecta.', 401);
     return responder({
-      token: await firmarSesion(env.SESSION_SECRET, HORAS_SESION),
+      token: await firmarSesion(claveSesion(env, admin.passwordHash), HORAS_SESION),
       expiraEn: HORAS_SESION * 3600_000
     });
   }
 
   // ---------- De acá en adelante hace falta sesión válida ----------
-  const autorizado = await verificarSesion(env.SESSION_SECRET, cuerpo.token);
+  const autorizado = await verificarSesion(claveSesion(env, admin.passwordHash), cuerpo.token);
   if(!autorizado) return error('Sesión vencida. Volvé a ingresar.', 401);
 
   if(cuerpo.accion !== 'guardar') return error('Acción desconocida.');

@@ -1,7 +1,8 @@
 // ============================================================
 //  Configuración del sitio — GALLO
-//  Sin claves ni secretos: los datos son un archivo estático del repo
-//  y todo lo sensible vive en variables de entorno del hosting.
+//  Sin claves ni secretos: los datos son un archivo estático del repo,
+//  la contraseña del panel está hasheada en config/admin.json (que el
+//  navegador no puede leer) y el token de GitHub vive en el hosting.
 // ============================================================
 
 // De dónde sale el catálogo. Es un archivo del repo, así que se sirve

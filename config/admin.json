@@ -1,0 +1,5 @@
+{
+  "_nota": "Contraseña del panel, hasheada. Para cambiarla: node tools/hash-password.mjs \"nueva-contraseña\"",
+  "passwordHash": "pbkdf2$210000$Gre6RgOgFVkqPxVQFwQvIw==$HqQNNzonOywy1hbsU7cJTXcUAZlVpv3WnOhbsMf3tfM=",
+  "actualizado": "2026-09-16"
+}

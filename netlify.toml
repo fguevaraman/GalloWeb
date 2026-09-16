@@ -7,11 +7,21 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+  # El hash de la contraseña viaja con la función, no como variable de entorno.
+  included_files = ["config/admin.json"]
 
 [[redirects]]
   from = "/admin"
   to = "/admin.html"
   status = 200
+
+# config/ no se sirve como estático: la función lo lee del disco, el navegador no.
+# En otro hosting es la única regla equivalente que hay que escribir
+# (Vercel: "rewrites"/"headers"; Apache: un Deny en .htaccess).
+[[redirects]]
+  from = "/config/*"
+  to = "/index.html"
+  status = 404
 
 # El catálogo se revalida siempre: cuando el panel publica, el cambio
 # tiene que verse enseguida y no quedar cacheado.

@@ -4,6 +4,7 @@ Sitio institucional + catálogo de productos con **panel de administración** pa
 
 - **Frontend:** HTML/CSS/JS estático, sin build step.
 - **Datos:** `productos.json` y las imágenes viven **en este repo**. GitHub hace de base de datos.
+- **Contraseña del panel:** hasheada en `config/admin.json`, otro archivo del repo. No es una variable de entorno de ningún hosting.
 - **Escritura:** una función chica y portable (`api/`) que commitea los cambios del panel.
 - **Ventas:** catálogo con botón *Consultar por WhatsApp* (sin carrito ni pago online).
 
@@ -13,13 +14,15 @@ No hay base de datos que mantener, no hay servicio que se pause por inactividad 
 
 ```
 productos.json          ← el catálogo (datos)
+config/admin.json       ← hash de la contraseña del panel
 assets/productos/       ← imágenes subidas desde el panel
 api/                    ← núcleo portable: (Request, env) -> Response
   admin.mjs               lógica del panel
   auth.mjs                PBKDF2 + sesión firmada (solo WebCrypto)
+  credenciales.mjs        lee config/admin.json en cualquier runtime
   github.mjs              escribe en el repo con la Git Data API
 netlify/functions/      ← adaptador del hosting (12 líneas)
-tools/hash-password.mjs ← genera las variables de entorno
+tools/hash-password.mjs ← genera/cambia la contraseña
 ```
 
 **La lectura no toca ningún servidor:** `productos.html` hace `fetch('productos.json')`, que es un archivo estático. Funciona igual en Netlify, Vercel, Cloudflare Pages, GitHub Pages o un Apache propio.
@@ -40,13 +43,16 @@ tools/hash-password.mjs ← genera las variables de entorno
 
 ## Puesta en marcha del panel
 
-### 1. Generar las credenciales
+### 1. Generar la contraseña
 
 ```bash
 node tools/hash-password.mjs "la-contraseña-del-dueño"
+git add config/admin.json && git commit -m "Contraseña del panel" && git push
 ```
 
-Imprime `ADMIN_PASSWORD_HASH` y `SESSION_SECRET`. **La contraseña en sí no se guarda en ningún lado** — solo su hash PBKDF2, y el hash vive en el hosting, nunca en el repo ni en el navegador.
+Escribe el hash PBKDF2 en `config/admin.json`. **La contraseña en sí no se guarda en ningún lado**, y el archivo no se sirve al navegador (ver `netlify.toml`). Para cambiarla, el mismo comando otra vez y un commit: en el próximo deploy ya rige la nueva, y las sesiones abiertas se caen solas.
+
+> Elegí una contraseña larga (mínimo 12 caracteres, el script no acepta menos). Como este repo es público, el hash se puede leer desde GitHub; lo único que separa a un curioso de la contraseña es el largo de la contraseña más las 210.000 iteraciones de PBKDF2. Si el repo se pasa a privado, ni eso.
 
 ### 2. Crear el token de GitHub
 
@@ -58,15 +64,15 @@ GitHub → *Settings* → *Developer settings* → **Fine-grained personal acces
 
 ### 3. Cargar las variables de entorno en el hosting
 
-En Netlify: *Site configuration* → *Environment variables*.
+Quedan solo las de GitHub, porque un token de escritura **no puede** ir en el repo (GitHub lo revoca apenas lo detecta en un commit). En Netlify: *Site configuration* → *Environment variables*.
 
 | Variable | Valor |
 |---|---|
-| `ADMIN_PASSWORD_HASH` | lo que imprimió el paso 1 |
-| `SESSION_SECRET` | lo que imprimió el paso 1 |
 | `GITHUB_TOKEN` | el token del paso 2 |
 | `GITHUB_REPO` | `fguevaraman/GalloWeb` |
 | `GITHUB_BRANCH` | `main` (opcional) |
+
+La clave con la que se firman las sesiones no se configura: sale de `GITHUB_TOKEN` + el hash de la contraseña (`api/admin.mjs`). Un secreto menos para administrar y ninguno viajando en el repo.
 
 ### 4. Listo
 
@@ -84,10 +90,11 @@ Como cada cambio es un commit, **todo el historial queda en git**: si el dueño 
 
 ## Seguridad
 
-- La contraseña se verifica **en el servidor**. El hash nunca llega al navegador.
+- La contraseña se verifica **en el servidor**. El hash nunca llega al navegador: `config/` no se sirve como estático.
 - PBKDF2-SHA256 con 210.000 iteraciones (recomendación OWASP). El costo de ~150ms por intento es además un freno a la fuerza bruta.
 - La sesión es un token firmado con HMAC-SHA256 que vence a las 12hs. No hay estado en el servidor.
-- El `GITHUB_TOKEN` vive solo en las variables de entorno del hosting y está limitado a *Contents* de este repo.
+- El `GITHUB_TOKEN` vive solo en las variables de entorno del hosting y está limitado a *Contents* de este repo. Es lo único que un atacante necesitaría para escribir en el repo, y es lo único que no está en el repo.
+- Con el repo público, el hash de `config/admin.json` es visible en GitHub. Es aceptable para lo que es este panel, pero **la contraseña tiene que ser larga**; si el repo pasa a privado, el punto desaparece.
 
 ## Probar en local
 
@@ -108,7 +115,15 @@ netlify dev    # necesita las variables de entorno cargadas
 
 `netlify.toml` ya define `publish = "."` y el directorio de funciones. No hay build step.
 
-Para otro hosting: publicar la raíz del repo como estático y montar `api/admin.mjs` en la ruta `/api/admin` con el adaptador que corresponda.
+### Mudarse a otro hosting
+
+La contraseña se muda sola: es un archivo del repo, no hay nada que volver a cargar en un panel de administración ajeno. Lo que hay que hacer en el hosting nuevo:
+
+1. Publicar la raíz del repo como estático.
+2. Montar `api/admin.mjs` en `/api/admin` con el adaptador de la plataforma (Vercel, Cloudflare y Deno están comentados en `netlify/functions/admin.mjs`).
+3. Cargar `GITHUB_TOKEN` y `GITHUB_REPO`.
+4. Bloquear `/config/*` para que no se sirva como estático (en Netlify es un redirect a 404; en Apache, un `Deny` en `.htaccess`).
+5. Asegurarse de que `config/admin.json` viaje con la función. Si el hosting empaqueta con un bundler, el `import` de JSON de `api/credenciales.mjs` lo deja inline y no hay que hacer nada; si no, alcanza con que el archivo esté en el disco (Netlify lo fuerza con `included_files`). `credenciales.mjs` prueba las dos formas y una tercera desde la raíz del proyecto.
 
 ---
 

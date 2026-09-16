@@ -43,7 +43,7 @@ async function derivar(password, salt, iteraciones){
   return new Uint8Array(bits);
 }
 
-// Genera el valor que va en la variable de entorno ADMIN_PASSWORD_HASH
+// Genera el hash que se guarda en config/admin.json
 export async function crearHash(password){
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const hash = await derivar(password, salt, ITERACIONES);
