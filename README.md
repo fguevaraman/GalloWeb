@@ -2,9 +2,29 @@
 
 Sitio institucional + catálogo de productos con **panel de administración** para el taller mecánico **Gallo** (Ituzaingó 371, Rosario).
 
-- **Frontend:** HTML/CSS/JS estático (sin build step). Deploy en Netlify, Vercel o GitHub Pages.
-- **Backend:** [Supabase](https://supabase.com) (gratis) — login del administrador, base de datos de productos y almacenamiento de imágenes.
+- **Frontend:** HTML/CSS/JS estático, sin build step.
+- **Datos:** `productos.json` y las imágenes viven **en este repo**. GitHub hace de base de datos.
+- **Escritura:** una función chica y portable (`api/`) que commitea los cambios del panel.
 - **Ventas:** catálogo con botón *Consultar por WhatsApp* (sin carrito ni pago online).
+
+No hay base de datos que mantener, no hay servicio que se pause por inactividad y no hay costo mensual.
+
+## Cómo está armado
+
+```
+productos.json          ← el catálogo (datos)
+assets/productos/       ← imágenes subidas desde el panel
+api/                    ← núcleo portable: (Request, env) -> Response
+  admin.mjs               lógica del panel
+  auth.mjs                PBKDF2 + sesión firmada (solo WebCrypto)
+  github.mjs              escribe en el repo con la Git Data API
+netlify/functions/      ← adaptador del hosting (12 líneas)
+tools/hash-password.mjs ← genera las variables de entorno
+```
+
+**La lectura no toca ningún servidor:** `productos.html` hace `fetch('productos.json')`, que es un archivo estático. Funciona igual en Netlify, Vercel, Cloudflare Pages, GitHub Pages o un Apache propio.
+
+**La escritura es lo único atado a la plataforma**, y está aislada en un adaptador. Para mudarse hay que escribir el equivalente a `netlify/functions/admin.mjs`; `api/` no se toca. Los ejemplos para Vercel, Cloudflare y Deno están comentados en ese mismo archivo.
 
 ## Páginas
 
@@ -12,65 +32,89 @@ Sitio institucional + catálogo de productos con **panel de administración** pa
 |---|---|
 | `index.html` | Home institucional (hero, servicios, nosotros, medios de pago) |
 | `servicios.html` | Detalle de todos los servicios del taller |
-| `productos.html` | Catálogo de productos (se carga desde Supabase) |
+| `productos.html` | Catálogo (se carga desde `productos.json`) |
 | `contacto.html` | Dirección, horarios, WhatsApp y mapa |
 | `admin.html` | Panel de administración (login + alta/edición/baja de productos) |
 
-Mientras Supabase no esté configurado, `productos.html` muestra **productos de ejemplo** y `admin.html` avisa que falta la configuración.
+---
+
+## Puesta en marcha del panel
+
+### 1. Generar las credenciales
+
+```bash
+node tools/hash-password.mjs "la-contraseña-del-dueño"
+```
+
+Imprime `ADMIN_PASSWORD_HASH` y `SESSION_SECRET`. **La contraseña en sí no se guarda en ningún lado** — solo su hash PBKDF2, y el hash vive en el hosting, nunca en el repo ni en el navegador.
+
+### 2. Crear el token de GitHub
+
+GitHub → *Settings* → *Developer settings* → **Fine-grained personal access tokens** → *Generate new token*:
+
+- **Repository access:** solo este repositorio.
+- **Permissions:** *Contents* → **Read and write**. Nada más.
+- **Expiration:** lo que prefieras (hay que renovarlo al vencer).
+
+### 3. Cargar las variables de entorno en el hosting
+
+En Netlify: *Site configuration* → *Environment variables*.
+
+| Variable | Valor |
+|---|---|
+| `ADMIN_PASSWORD_HASH` | lo que imprimió el paso 1 |
+| `SESSION_SECRET` | lo que imprimió el paso 1 |
+| `GITHUB_TOKEN` | el token del paso 2 |
+| `GITHUB_REPO` | `fguevaraman/GalloWeb` |
+| `GITHUB_BRANCH` | `main` (opcional) |
+
+### 4. Listo
+
+Entrá a `/admin`, poné la contraseña y cargá productos. Al guardar, el panel commitea al repo y el hosting redeploya solo: el cambio se ve en el sitio público en menos de un minuto.
 
 ---
 
-## Puesta en marcha del panel (Supabase)
+## Cómo funciona el guardado
 
-1. **Crear proyecto:** entrá a [supabase.com](https://supabase.com), creá una cuenta y un proyecto nuevo (gratis).
-2. **Crear la base:** en el panel de Supabase → **SQL Editor** → *New query* → pegá todo el contenido de [`supabase-setup.sql`](./supabase-setup.sql) y ejecutá (**Run**). Esto crea la tabla `productos`, las políticas de seguridad y el bucket de imágenes.
-3. **Crear el usuario admin:** Supabase → **Authentication** → **Users** → *Add user* → poné el email y contraseña del dueño. (Con esas credenciales se entra a `admin.html`.)
-4. **Copiar credenciales:** Supabase → **Project Settings** → **API** → copiá **Project URL** y la clave **anon public**.
-5. **Pegarlas en el sitio:** abrí `js/supabase.js` y reemplazá:
-   ```js
-   export const SUPABASE_URL = 'https://TU-PROYECTO.supabase.co';
-   export const SUPABASE_ANON_KEY = 'TU-ANON-KEY';
-   ```
-6. Listo. Entrá a `admin.html`, iniciá sesión y cargá productos (nombre, descripción, precio y hasta 3 imágenes). Aparecen automáticamente en `productos.html`.
+El panel trabaja sobre una copia en memoria del catálogo completo y al guardar manda **el estado final entero**. El servidor lo valida, resuelve las imágenes nuevas y escribe todo en **un solo commit**. Si algo falla, no queda nada a medias.
 
-> La clave *anon* es **pública** por diseño; la seguridad la dan las políticas RLS del SQL (leer todos, escribir solo autenticados).
+Las imágenes se redimensionan a 1200px y se convierten a **webp en el navegador** antes de subir: una foto de celular de 4MB queda en ~80KB. Cuando una imagen deja de usarse, se borra del repo en el mismo commit.
 
----
+Como cada cambio es un commit, **todo el historial queda en git**: si el dueño borra algo por error, se recupera con un `git revert`.
+
+## Seguridad
+
+- La contraseña se verifica **en el servidor**. El hash nunca llega al navegador.
+- PBKDF2-SHA256 con 210.000 iteraciones (recomendación OWASP). El costo de ~150ms por intento es además un freno a la fuerza bruta.
+- La sesión es un token firmado con HMAC-SHA256 que vence a las 12hs. No hay estado en el servidor.
+- El `GITHUB_TOKEN` vive solo en las variables de entorno del hosting y está limitado a *Contents* de este repo.
 
 ## Probar en local
 
 Como usa módulos ES, servilo con un servidor (no `file://`):
 
 ```bash
-cd Gallo
 python3 -m http.server 8000
 # abrir http://localhost:8000
 ```
 
-## Deploy en Netlify
+El sitio público anda completo así. Para probar también el panel hace falta que corra la función:
 
-1. Arrastrá la carpeta `Gallo` a [netlify.com/drop](https://app.netlify.com/drop), **o** conectá el repo.
-2. `netlify.toml` ya define `publish = "."`. No hay build.
-3. (Opcional) Cambiá el número de WhatsApp en `js/supabase.js` (`WHATSAPP`) y en los `.html` si hiciera falta.
+```bash
+netlify dev    # necesita las variables de entorno cargadas
+```
+
+## Deploy
+
+`netlify.toml` ya define `publish = "."` y el directorio de funciones. No hay build step.
+
+Para otro hosting: publicar la raíz del repo como estático y montar `api/admin.mjs` en la ruta `/api/admin` con el adaptador que corresponda.
 
 ---
 
 ## Datos del negocio
 
 - **Nombre:** Gallo — Servicio Mecánico · Repuestos y Servicios
-- **Dirección:** Ituzaingó 371, Rosario, Santa Fe, Argentina
-- **WhatsApp / Consultas:** 341-6684947
-- **Horarios:** Lunes a Viernes, de 8 a 12 y de 14 a 18 hs
-- **Medios de pago:** todas las tarjetas · Mercado Pago
-
-## Identidad visual
-
-| Token | Valor |
-|---|---|
-| Navy fondo | `#10151F` / `#0B0F17` |
-| Crema texto | `#EDE3CC` |
-| Rojo insignia | `#C1352B` |
-| Dorado ala | `#C99A5B` |
-| Tipografías | Staatliches (display) · Barlow / Barlow Condensed (texto) · Kaushan Script (firma) |
-
-Estética *vintage garage*, basada en el logo alado y las piezas gráficas de la marca.
+- **Dirección:** Ituzaingó 371, Rosario, Santa Fe
+- **WhatsApp:** 341-6684947 (se cambia en `js/config.js`)
+- **Horarios:** Lunes a viernes de 8 a 12 y de 14 a 18 hs

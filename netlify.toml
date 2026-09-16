@@ -1,12 +1,25 @@
+# Adaptador de Netlify. Lo único específico de la plataforma:
+# el resto del sitio son archivos estáticos y un handler portable en api/.
+
 [build]
   publish = "."
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
 
 [[redirects]]
   from = "/admin"
   to = "/admin.html"
   status = 200
 
-# Cache de assets estáticos
+# El catálogo se revalida siempre: cuando el panel publica, el cambio
+# tiene que verse enseguida y no quedar cacheado.
+[[headers]]
+  for = "/productos.json"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
 [[headers]]
   for = "/assets/*"
   [headers.values]

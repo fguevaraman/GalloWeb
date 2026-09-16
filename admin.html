@@ -67,10 +67,11 @@
   #dropzone:hover{border-color:var(--gold);color:var(--gold-bright)}
   .save-row{display:flex;align-items:center;gap:16px;margin-top:22px}
 
-  #not-configured{display:none;max-width:640px;margin:60px auto;padding:0 24px;text-align:center}
-  #not-configured .card{background:var(--navy-700);border:1px solid var(--line);border-radius:var(--radius);padding:40px 34px}
-  #not-configured code{background:var(--navy-900);padding:2px 6px;border-radius:3px;color:var(--gold-bright);font-size:13px}
-  #not-configured a{color:var(--gold-bright)}
+  /* Barra de estado del guardado */
+  #estado{display:none;border-radius:var(--radius);padding:13px 18px;margin-bottom:18px;font-size:14.5px;border:1px solid var(--line)}
+  #estado[data-tono="info"]{background:rgba(201,154,91,.12);color:var(--gold-bright)}
+  #estado[data-tono="ok"]{background:rgba(94,164,110,.14);color:#8fd6a4;border-color:rgba(94,164,110,.4)}
+  #estado[data-tono="error"]{background:rgba(193,53,43,.14);color:#ff8f7d;border-color:rgba(193,53,43,.45)}
 </style>
 </head>
 <body>
@@ -89,23 +90,12 @@
   </div>
 </header>
 
-<!-- Supabase sin configurar -->
-<div id="not-configured">
-  <div class="card">
-    <h1 style="font-size:34px;margin-bottom:14px">Falta configurar Supabase</h1>
-    <p class="muted" style="margin-bottom:16px">Para activar el panel de administración, completá tus credenciales en <code>js/supabase.js</code> y ejecutá el <code>supabase-setup.sql</code>.</p>
-    <p class="muted">Seguí los pasos del <a href="https://supabase.com" target="_blank" rel="noopener">README</a>. Es gratis y toma unos minutos.</p>
-  </div>
-</div>
-
 <!-- Login -->
-<div id="login-view" style="display:none">
+<div id="login-view">
   <form class="login-card" id="login-form">
     <img src="assets/logo.jpg" alt="Gallo">
     <h1>Administración</h1>
     <p class="sub">Ingresá para gestionar los productos</p>
-    <label for="email">Email</label>
-    <input id="email" type="email" autocomplete="username" required>
     <label for="password">Contraseña</label>
     <input id="password" type="password" autocomplete="current-password" required>
     <button class="btn btn-red" id="login-btn" style="width:100%;justify-content:center;margin-top:22px" type="submit">Ingresar</button>
@@ -123,6 +113,7 @@
       </div>
       <button class="btn btn-gold" id="new-btn">+ Nuevo producto</button>
     </div>
+    <div id="estado"></div>
     <div id="prod-list"></div>
   </div>
 </main>
