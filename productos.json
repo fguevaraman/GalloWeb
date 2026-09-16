@@ -1,14 +1,5 @@
 [
   {
-    "id": "seed-bateria",
-    "nombre": "Batería 12V",
-    "descripcion": "Batería nueva con garantía. Control de carga sin cargo.",
-    "precio": 120000,
-    "imagenes": [
-      "assets/horarios.webp"
-    ]
-  },
-  {
     "id": "seed-filtro-aceite",
     "nombre": "Filtro de aceite + aceite",
     "descripcion": "Combo de service. Filtro y 4L de aceite. Consultá especificación.",
