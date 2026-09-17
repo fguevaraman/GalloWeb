@@ -189,6 +189,14 @@ async function eliminar(p){
   }
 }
 
+// ---------- Guía de uso ----------
+
+$('#guia-btn').addEventListener('click', () => $('#modal-guia').classList.add('open'));
+$('#guia-close').addEventListener('click', () => $('#modal-guia').classList.remove('open'));
+$('#modal-guia').addEventListener('click', e => {
+  if(e.target.id === 'modal-guia') $('#modal-guia').classList.remove('open');
+});
+
 // ---------- Categorías ----------
 
 // Se edita sobre un borrador: hasta que no se aprieta "Guardar categorías"

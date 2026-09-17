@@ -51,8 +51,8 @@
   @media(max-width:620px){.prow{grid-template-columns:56px 1fr}.prow-actions{grid-column:1/-1}.prow img{width:56px;height:56px}}
 
   /* Modal */
-  #modal,#modal-cats{position:fixed;inset:0;z-index:120;background:rgba(6,9,14,.8);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
-  #modal.open,#modal-cats.open{display:flex}
+  #modal,#modal-cats,#modal-guia{position:fixed;inset:0;z-index:120;background:rgba(6,9,14,.8);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+  #modal.open,#modal-cats.open,#modal-guia.open{display:flex}
   .modal-card{width:100%;max-width:560px;background:var(--navy-800);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-lg)}
   .modal-hd{display:flex;align-items:center;justify-content:space-between;padding:22px 26px;border-bottom:1px solid var(--line)}
   .modal-hd h2{font-size:28px}
@@ -85,6 +85,18 @@
   #dropzone{display:flex;align-items:center;justify-content:center;gap:8px;padding:22px;border:1.5px dashed var(--line);border-radius:var(--radius);cursor:pointer;color:var(--cream-mute);transition:.18s}
   #dropzone:hover{border-color:var(--gold);color:var(--gold-bright)}
   .save-row{display:flex;align-items:center;gap:16px;margin-top:22px}
+
+  /* Guía de uso */
+  #modal-guia .modal-card{max-width:680px}
+  .guia h3{font-size:22px;letter-spacing:.5px;margin:30px 0 12px;color:var(--cream)}
+  .guia h3:first-child{margin-top:0}
+  .guia p{color:var(--cream-mute);font-size:15px;line-height:1.65;margin-bottom:12px}
+  .guia ul{list-style:none;margin:0 0 12px}
+  .guia li{color:var(--cream-mute);font-size:15px;line-height:1.6;padding-left:18px;position:relative;margin-bottom:9px}
+  .guia li::before{content:'';position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--gold)}
+  .guia b{color:var(--cream);font-weight:600}
+  .guia .dato{display:block;border-left:2px solid var(--gold);background:rgba(201,154,91,.08);
+    padding:12px 16px;margin:16px 0;color:var(--cream-dim);font-size:14.5px;line-height:1.6}
 
   /* Barra de estado del guardado */
   #estado{display:none;border-radius:var(--radius);padding:13px 18px;margin-bottom:18px;font-size:14.5px;border:1px solid var(--line)}
@@ -131,6 +143,7 @@
         <h1>Productos</h1>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-ghost" id="guia-btn">Cómo se usa</button>
         <button class="btn btn-ghost" id="cats-btn">Categorías</button>
         <button class="btn btn-gold" id="new-btn">+ Nuevo producto</button>
       </div>
@@ -214,6 +227,93 @@
         <button class="btn btn-red" id="cats-save" type="button">Guardar categorías</button>
         <div class="msg" id="cats-msg" style="margin:0"></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Guía de uso (solo se ve acá adentro) -->
+<div id="modal-guia">
+  <div class="modal-card">
+    <div class="modal-hd">
+      <h2>Cómo se usa el panel</h2>
+      <button id="guia-close" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-bd guia">
+
+      <h3>Lo básico</h3>
+      <p>Todo lo que guardás acá se publica en el sitio: el cambio se ve en
+        <b>menos de un minuto</b>, sin que tengas que avisarle a nadie.</p>
+      <p>Cada guardado queda registrado con fecha, así que <b>nada se pierde</b>:
+        si borrás algo por error, se puede recuperar.</p>
+
+      <h3>Cargar un producto</h3>
+      <ul>
+        <li><b>+ Nuevo producto</b>, completás y <b>Guardar producto</b>.</li>
+        <li><b>Nombre:</b> es lo que busca el cliente. Poné cómo lo pide la gente
+          ("Kit de distribución", no un código interno).</li>
+        <li><b>Descripción:</b> opcional. En el catálogo se muestran las primeras
+          líneas, así que lo importante va al principio.</li>
+        <li><b>Precio:</b> si lo dejás <b>vacío</b>, el cliente ve
+          <b>“Consultar”</b>. Útil para lo que cambia seguido o depende del modelo.</li>
+        <li><b>Categoría:</b> para que aparezca en el filtro del catálogo. Si no
+          elegís ninguna, el producto igual se muestra, pero dentro de "Otros".</li>
+      </ul>
+
+      <h3>Fotos</h3>
+      <ul>
+        <li>Hasta <b>3 por producto</b>. La <b>primera es la portada</b>: es la que se
+          ve en el listado.</li>
+        <li>Sacá la foto con el celular y subila tal cual: el panel la achica y la
+          optimiza sola antes de subirla.</li>
+        <li>Para sacar una, la <b>✕</b> roja arriba de la miniatura. Se borra recién
+          cuando guardás.</li>
+      </ul>
+
+      <h3>Editar y eliminar</h3>
+      <ul>
+        <li><b>Editar</b> abre el producto; cambiás lo que sea y guardás.</li>
+        <li><b>Eliminar</b> pide confirmación y no se puede deshacer desde el panel
+          (si pasó, avisá y se recupera).</li>
+        <li>Cambiar un precio es entrar, escribir el número y guardar. Nada más.</li>
+      </ul>
+
+      <h3>Categorías</h3>
+      <p>Con el botón <b>Categorías</b> manejás la lista que aparece en el
+        desplegable del producto y en el filtro del catálogo.</p>
+      <ul>
+        <li><b>Agregar:</b> escribís el nombre abajo de todo y <b>Agregar</b>.</li>
+        <li><b>Renombrar:</b> escribís encima del nombre. <b>No rompe nada</b>: los
+          productos que la usaban siguen igual.</li>
+        <li><b>Ordenar:</b> las flechas ↑ ↓. Ese es el orden en que las ve el cliente,
+          así que poné arriba las que más vendés.</li>
+        <li><b>Borrar:</b> la <b>✕</b>. Si tiene productos te avisa cuántos son; si
+          seguís, esos productos quedan <b>sin categoría</b> (pasan a "Otros"), no se
+          borran.</li>
+        <li>Los cambios recién se aplican cuando apretás <b>Guardar categorías</b>.</li>
+      </ul>
+      <span class="dato">Al lado de cada categoría dice cuántos productos tiene.
+        Si dice “0 productos”, esa categoría <b>no le aparece al cliente</b> en el
+        filtro hasta que le cargues algo.</span>
+
+      <h3>Qué ve el cliente</h3>
+      <ul>
+        <li>Busca por nombre o descripción, y filtra por categoría.</li>
+        <li>Ve de a 30 productos por página (puede pasar a 50 o ver todos).</li>
+        <li>En cada producto tiene el botón <b>Consultar</b>, que le abre el WhatsApp
+          del taller con el nombre del producto ya escrito.</li>
+      </ul>
+
+      <h3>Si algo sale mal</h3>
+      <ul>
+        <li><b>“Sesión vencida”:</b> pasaron más de 12 horas. Volvés a entrar y listo,
+          no se perdió nada de lo ya guardado.</li>
+        <li><b>“El repositorio cambió mientras guardabas”:</b> alguien guardó desde
+          otra computadora al mismo tiempo. Recargás la página y volvés a hacer el
+          cambio.</li>
+        <li>Si un guardado falla, <b>no queda nada a medias</b>: o entra todo o no
+          entra nada. Lo que veías antes sigue igual.</li>
+      </ul>
+
     </div>
   </div>
 </div>
