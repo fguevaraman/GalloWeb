@@ -38,7 +38,7 @@ tools/hash-password.mjs ← genera/cambia la contraseña
 | `servicios.html` | Detalle de todos los servicios del taller |
 | `productos.html` | Catálogo: buscador, filtro por categoría y paginado (30 / 50 / todos) |
 | `contacto.html` | Dirección, horarios, WhatsApp y mapa |
-| `admin.html` | Panel de administración (login + alta/edición/baja de productos) |
+| `admin.html` | Panel de administración (login + ABM de productos y de categorías) |
 
 ---
 
@@ -93,7 +93,8 @@ Viven en `categorias.json`, una lista de `id` + `nombre`:
 ```
 
 - El `id` es lo que se guarda en cada producto (`"categoria": "frenos"`) y no debería cambiar: si lo cambiás, los productos que lo usaban quedan sueltos. El `nombre` sí se puede editar cuando quieras, es lo único que se muestra.
-- **Para agregar o sacar una categoría se edita el archivo y se commitea**, igual que la contraseña. El orden del archivo es el orden del combo.
+- **Se administran desde el panel**, con el botón *Categorías*: alta, renombre, orden (con las flechas) y baja. Al guardar, `categorias.json` se commitea igual que el catálogo. También se puede editar el archivo a mano, es lo mismo.
+- Si borrás una categoría que tiene productos, el panel avisa cuántos son y esos productos quedan **sin categoría**; el cambio de las categorías y el de los productos viajan en el mismo commit, así nunca queda un producto apuntando a una categoría que no existe.
 - El panel arma el desplegable del formulario con este archivo, y el servidor **rechaza** cualquier producto con una categoría que no exista acá.
 - En el catálogo público el filtro muestra solo las categorías que tengan al menos un producto, con el total al lado. Los productos sin categoría (o con una categoría borrada del archivo) caen en **Otros**, así nunca quedan invisibles.
 - La categoría elegida queda en la URL (`productos.html?cat=frenos`), o sea que se puede mandar el link ya filtrado por WhatsApp.

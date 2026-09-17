@@ -152,7 +152,8 @@ function estado(mensaje, tono = 'info'){
 }
 
 // Convierte las imágenes nuevas a base64 y manda el catálogo completo.
-async function publicar(mensajeExito){
+// Si se le pasan categorías, van en el mismo guardado (y en el mismo commit).
+async function publicar(mensajeExito, cats = null){
   const archivos = [];
   const carga = productos.map(p => ({
     ...p,
@@ -163,9 +164,14 @@ async function publicar(mensajeExito){
     })
   }));
 
+  const cuerpo = { accion:'guardar', token, productos: carga, archivos };
+  if(cats) cuerpo.categorias = cats;
+
   estado('Guardando y publicando...');
-  const datos = await api({ accion:'guardar', token, productos: carga, archivos });
+  const datos = await api(cuerpo);
   productos = datos.productos;
+  if(Array.isArray(datos.categorias)) categorias = datos.categorias;
+  llenarCombo();
   render();
   estado(`${mensajeExito} El sitio público se actualiza en menos de un minuto.`, 'ok');
 }
@@ -182,6 +188,134 @@ async function eliminar(p){
     estado(err.message, 'error');
   }
 }
+
+// ---------- Categorías ----------
+
+// Se edita sobre un borrador: hasta que no se aprieta "Guardar categorías"
+// no se toca ni el archivo ni el catálogo.
+let borradorCats = [];
+
+const enUso = id => productos.filter(p => p.categoria === id).length;
+
+// Mismo slug que usa el servidor, para que el id sea el mismo de los dos lados.
+function idDesde(nombre, usados){
+  const base = nombre
+    .normalize('NFD').replace(/[\u0300-\u036F]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+    .slice(0, 40) || 'categoria';
+  let id = base, n = 2;
+  while(usados.has(id)) id = `${base}-${n++}`;
+  return id;
+}
+
+function abrirCats(){
+  borradorCats = categorias.map(c => ({ ...c }));
+  $('#cats-msg').textContent = '';
+  $('#cat-nueva').value = '';
+  renderCats();
+  $('#modal-cats').classList.add('open');
+}
+
+const cerrarCats = () => $('#modal-cats').classList.remove('open');
+
+function renderCats(){
+  const lista = $('#cats-list');
+  lista.innerHTML = '';
+  if(!borradorCats.length){
+    lista.innerHTML = '<p class="muted">Todavía no hay categorías.</p>';
+    return;
+  }
+
+  borradorCats.forEach((c, i) => {
+    const usos = enUso(c.id);
+    const fila = document.createElement('div');
+    fila.className = 'cat-row';
+    fila.innerHTML = `
+      <input type="text" maxlength="60" value="${esc(c.nombre)}">
+      <span class="muted cat-uso">${usos} producto${usos === 1 ? '' : 's'}</span>
+      <div class="cat-acciones">
+        <button type="button" data-up title="Subir" ${i === 0 ? 'disabled' : ''}>↑</button>
+        <button type="button" data-down title="Bajar" ${i === borradorCats.length - 1 ? 'disabled' : ''}>↓</button>
+        <button type="button" data-del title="Eliminar">✕</button>
+      </div>`;
+
+    fila.querySelector('input').addEventListener('input', e => { c.nombre = e.target.value; });
+    fila.querySelector('[data-up]').addEventListener('click', () => mover(i, -1));
+    fila.querySelector('[data-down]').addEventListener('click', () => mover(i, 1));
+    fila.querySelector('[data-del]').addEventListener('click', () => {
+      if(usos && !confirm(
+        `${usos} producto(s) usan "${c.nombre}". Si la borrás quedan sin categoría. ¿Seguir?`)) return;
+      borradorCats.splice(i, 1);
+      renderCats();
+    });
+    lista.appendChild(fila);
+  });
+}
+
+function mover(i, salto){
+  const destino = i + salto;
+  if(destino < 0 || destino >= borradorCats.length) return;
+  [borradorCats[i], borradorCats[destino]] = [borradorCats[destino], borradorCats[i]];
+  renderCats();
+}
+
+function agregarCat(){
+  const entrada = $('#cat-nueva');
+  const nombre = entrada.value.trim();
+  const msg = $('#cats-msg');
+  msg.textContent = '';
+  if(!nombre){ msg.textContent = 'Poné un nombre.'; return; }
+
+  const usados = new Set(borradorCats.map(c => c.id));
+  const id = idDesde(nombre, usados);
+  if(borradorCats.some(c => c.nombre.toLowerCase() === nombre.toLowerCase())){
+    msg.textContent = 'Ya existe una categoría con ese nombre.';
+    return;
+  }
+  borradorCats.push({ id, nombre });
+  entrada.value = '';
+  entrada.focus();
+  renderCats();
+}
+
+async function guardarCats(){
+  const btn = $('#cats-save'), msg = $('#cats-msg');
+  msg.textContent = '';
+
+  const limpias = borradorCats.map(c => ({ ...c, nombre: c.nombre.trim() }));
+  if(limpias.some(c => !c.nombre)){ msg.textContent = 'Hay una categoría sin nombre.'; return; }
+
+  // Los productos de una categoría borrada quedan sin categoría, y eso viaja
+  // en el mismo guardado: el servidor no acepta un producto apuntando a una
+  // categoría que ya no existe.
+  const vivas = new Set(limpias.map(c => c.id));
+  const respaldoProductos  = productos;
+  const respaldoCategorias = categorias;
+  productos = productos.map(p =>
+    (p.categoria && !vivas.has(p.categoria)) ? { ...p, categoria: null } : p);
+
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  try{
+    await publicar('Categorías actualizadas.', limpias);
+    cerrarCats();
+  }catch(err){
+    productos  = respaldoProductos;
+    categorias = respaldoCategorias;
+    render();
+    msg.textContent = err.message;
+  }finally{
+    btn.disabled = false; btn.textContent = 'Guardar categorías';
+  }
+}
+
+$('#cats-btn').addEventListener('click', abrirCats);
+$('#cats-close').addEventListener('click', cerrarCats);
+$('#modal-cats').addEventListener('click', e => { if(e.target.id === 'modal-cats') cerrarCats(); });
+$('#cat-add').addEventListener('click', agregarCat);
+$('#cat-nueva').addEventListener('keydown', e => {
+  if(e.key === 'Enter'){ e.preventDefault(); agregarCat(); }
+});
+$('#cats-save').addEventListener('click', guardarCats);
 
 // ---------- Formulario ----------
 

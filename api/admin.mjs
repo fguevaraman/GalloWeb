@@ -23,6 +23,7 @@ const RUTA_JSON     = 'productos.json';
 const RUTA_CATEGS   = 'categorias.json';
 const DIR_IMAGENES  = 'assets/productos';
 const MAX_PRODUCTOS = 300;
+const MAX_CATEGORIAS = 60;
 const MAX_IMAGENES  = 3;
 const MAX_BYTES_IMG = 1_500_000;      // ya llegan convertidas a webp desde el panel
 const HORAS_SESION  = 12;
@@ -56,6 +57,33 @@ function slug(nombre){
     .normalize('NFD').replace(/[\u0300-\u036F]/g, '')
     .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
     .slice(0, 40) || 'producto';
+}
+
+// Los id de las categorías son slugs estables: al renombrar una categoría el
+// id no cambia, así los productos que la usan no quedan sueltos.
+function idCategoria(valor){
+  return String(valor ?? '')
+    .normalize('NFD').replace(/[\u0300-\u036F]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+    .slice(0, 40);
+}
+
+function normalizarCategorias(lista){
+  if(!Array.isArray(lista)) throw new Error('Las categorías tienen que ser una lista.');
+  if(lista.length > MAX_CATEGORIAS) throw new Error(`Máximo ${MAX_CATEGORIAS} categorías.`);
+
+  const vistos = new Set();
+  return lista.map((categoria, indice) => {
+    const nombre = texto(categoria?.nombre, 60);
+    if(!nombre) throw new Error(`La categoría #${indice + 1} no tiene nombre.`);
+
+    const id = idCategoria(categoria?.id || nombre);
+    if(!id) throw new Error(`"${nombre}" no sirve como nombre de categoría.`);
+    if(vistos.has(id)) throw new Error(`Hay dos categorías que quedarían con el mismo id ("${id}").`);
+    vistos.add(id);
+
+    return { id, nombre };
+  });
 }
 
 function faltaConfig(env){
@@ -183,9 +211,19 @@ export async function manejar(request, env){
     return error(`No se pudo leer el repositorio: ${err.message}`, 502);
   }
 
-  const categoriasValidas = Array.isArray(categorias) && categorias.length
-    ? new Set(categorias.map(c => String(c?.id || '')).filter(Boolean))
-    : null;
+  // El panel puede mandar las categorías junto con el catálogo: así crear una
+  // categoría y asignarla a un producto entra en el mismo commit.
+  let categoriasFinales = null;
+  if(cuerpo.categorias !== undefined){
+    try{ categoriasFinales = normalizarCategorias(cuerpo.categorias); }
+    catch(err){ return error(err.message); }
+  }
+
+  const categoriasValidas = categoriasFinales
+    ? new Set(categoriasFinales.map(c => c.id))
+    : (Array.isArray(categorias) && categorias.length
+        ? new Set(categorias.map(c => String(c?.id || '')).filter(Boolean))
+        : null);
 
   let normalizado;
   try{
@@ -212,16 +250,37 @@ export async function manejar(request, env){
       }
     }
 
+    const archivos = [
+      { ruta: RUTA_JSON, contenido: JSON.stringify(limpios, null, 2) + '\n' },
+      ...imagenesNuevas
+    ];
+
+    // categorias.json solo se toca si realmente cambió, para no ensuciar el
+    // historial con commits que no cambian nada.
+    let mensaje = `Catálogo: ${limpios.length} producto(s) desde el panel`;
+    if(categoriasFinales){
+      const contenido = JSON.stringify(categoriasFinales, null, 2) + '\n';
+      const enElRepo = Array.isArray(categorias)
+        ? JSON.stringify(categorias, null, 2) + '\n'
+        : null;
+      if(contenido !== enElRepo){
+        archivos.push({ ruta: RUTA_CATEGS, contenido });
+        mensaje += ` y ${categoriasFinales.length} categoría(s)`;
+      }
+    }
+
     const resultado = await github.commitear({
-      archivos: [
-        { ruta: RUTA_JSON, contenido: JSON.stringify(limpios, null, 2) + '\n' },
-        ...imagenesNuevas
-      ],
+      archivos,
       borrados: [...huerfanas],
-      mensaje: `Catálogo: ${limpios.length} producto(s) desde el panel`
+      mensaje
     });
 
-    return responder({ ok: true, productos: limpios, commit: resultado.commit || null });
+    return responder({
+      ok: true,
+      productos: limpios,
+      categorias: categoriasFinales || (Array.isArray(categorias) ? categorias : []),
+      commit: resultado.commit || null
+    });
   }catch(err){
     const mensaje = String(err.message || err);
     if(mensaje.includes('422') || mensaje.includes('409')){

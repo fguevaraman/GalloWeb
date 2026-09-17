@@ -51,8 +51,8 @@
   @media(max-width:620px){.prow{grid-template-columns:56px 1fr}.prow-actions{grid-column:1/-1}.prow img{width:56px;height:56px}}
 
   /* Modal */
-  #modal{position:fixed;inset:0;z-index:120;background:rgba(6,9,14,.8);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
-  #modal.open{display:flex}
+  #modal,#modal-cats{position:fixed;inset:0;z-index:120;background:rgba(6,9,14,.8);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+  #modal.open,#modal-cats.open{display:flex}
   .modal-card{width:100%;max-width:560px;background:var(--navy-800);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-lg)}
   .modal-hd{display:flex;align-items:center;justify-content:space-between;padding:22px 26px;border-bottom:1px solid var(--line)}
   .modal-hd h2{font-size:28px}
@@ -60,6 +60,21 @@
   .modal-bd{padding:26px}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   @media(max-width:480px){.row2{grid-template-columns:1fr}}
+
+  /* ABM de categorías */
+  .cat-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;margin-bottom:10px}
+  .cat-row input{margin:0}
+  .cat-uso{font-size:13px;white-space:nowrap}
+  .cat-acciones{display:flex;gap:4px}
+  .cat-acciones button{width:34px;height:42px;border-radius:var(--radius);border:1px solid var(--line);
+    background:var(--navy-900);color:var(--cream-mute);cursor:pointer;font-size:15px;line-height:1;transition:.18s}
+  .cat-acciones button:hover:not(:disabled){border-color:var(--gold);color:var(--gold-bright)}
+  .cat-acciones button:disabled{opacity:.3;cursor:default}
+  .cat-acciones button[data-del]:hover{border-color:var(--red);color:#ff8f7d}
+  .cat-alta{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
+    border-top:1px solid var(--line);padding-top:18px;margin-top:18px}
+  .cat-alta input{margin:0}
+  @media(max-width:480px){.cat-row{grid-template-columns:1fr auto}.cat-uso{grid-column:1/-1;order:3}}
 
   /* Dropzone imágenes */
   .imgs-head{display:flex;justify-content:space-between;align-items:center}
@@ -115,7 +130,10 @@
         <span class="eyebrow">Panel</span>
         <h1>Productos</h1>
       </div>
-      <button class="btn btn-gold" id="new-btn">+ Nuevo producto</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-ghost" id="cats-btn">Categorías</button>
+        <button class="btn btn-gold" id="new-btn">+ Nuevo producto</button>
+      </div>
     </div>
     <div id="estado"></div>
     <div id="prod-list"></div>
@@ -169,6 +187,34 @@
         <div class="msg" id="form-msg" style="margin:0"></div>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- Modal de categorías -->
+<div id="modal-cats">
+  <div class="modal-card">
+    <div class="modal-hd">
+      <h2>Categorías</h2>
+      <button id="cats-close" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-bd">
+      <p class="muted" style="font-size:13.5px;margin-bottom:18px">
+        El orden de la lista es el orden en que aparecen en el catálogo. Renombrar una
+        categoría no afecta a los productos que la usan.
+      </p>
+
+      <div id="cats-list"></div>
+
+      <div class="cat-alta">
+        <input id="cat-nueva" type="text" maxlength="60" placeholder="Nombre de la categoría nueva">
+        <button class="btn btn-ghost" id="cat-add" type="button">Agregar</button>
+      </div>
+
+      <div class="save-row">
+        <button class="btn btn-red" id="cats-save" type="button">Guardar categorías</button>
+        <div class="msg" id="cats-msg" style="margin:0"></div>
+      </div>
+    </div>
   </div>
 </div>
 
