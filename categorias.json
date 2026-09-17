@@ -1,12 +1,66 @@
 [
-  { "id": "encendido",    "nombre": "Encendido" },
-  { "id": "frenos",       "nombre": "Frenos" },
-  { "id": "motor",        "nombre": "Motor" },
-  { "id": "distribucion", "nombre": "Distribución" },
-  { "id": "filtros",      "nombre": "Filtros y lubricantes" },
-  { "id": "electrico",    "nombre": "Eléctrico y baterías" },
-  { "id": "suspension",   "nombre": "Suspensión y dirección" },
-  { "id": "transmision",  "nombre": "Transmisión y embrague" },
-  { "id": "refrigeracion","nombre": "Refrigeración" },
-  { "id": "accesorios",   "nombre": "Accesorios" }
+  {
+    "id": "encendido",
+    "nombre": "Encendido"
+  },
+  {
+    "id": "frenos",
+    "nombre": "Frenos"
+  },
+  {
+    "id": "motor",
+    "nombre": "Motor"
+  },
+  {
+    "id": "distribucion",
+    "nombre": "Distribución"
+  },
+  {
+    "id": "filtros",
+    "nombre": "Filtros"
+  },
+  {
+    "id": "electrico",
+    "nombre": "Electricidad"
+  },
+  {
+    "id": "suspension",
+    "nombre": "Suspensión"
+  },
+  {
+    "id": "transmision",
+    "nombre": "Transmisión y embrague"
+  },
+  {
+    "id": "refrigeracion",
+    "nombre": "Circuito de refrigeración"
+  },
+  {
+    "id": "accesorios",
+    "nombre": "Accesorios"
+  },
+  {
+    "id": "lubricantes",
+    "nombre": "Lubricantes"
+  },
+  {
+    "id": "iluminacion",
+    "nombre": "Iluminación"
+  },
+  {
+    "id": "inyeccion",
+    "nombre": "Inyección"
+  },
+  {
+    "id": "juntas",
+    "nombre": "Juntas"
+  },
+  {
+    "id": "tren-delantero",
+    "nombre": "Tren delantero"
+  },
+  {
+    "id": "baterias",
+    "nombre": "Baterías"
+  }
 ]
