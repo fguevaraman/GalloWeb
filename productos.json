@@ -10,9 +10,9 @@
   {
     "id": "b29b8d73-cf35-4542-a720-bd8f1733c027",
     "nombre": "Bombas de agua Dolz",
-    "descripcion": "No se la descripcion, pero se puede poner algo",
+    "descripcion": "Contamos con bombas de agua para todos los modelos. Consultar por stock disponible",
     "precio": null,
-    "categoria": null,
+    "categoria": "refrigeracion",
     "imagenes": [
       "assets/productos/bombas-de-agua-dolz-mu4hpmie-r2w4i.webp"
     ]
