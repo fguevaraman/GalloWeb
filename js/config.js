@@ -13,8 +13,10 @@ export const RUTA_CATALOGO = 'productos.json';
 // archivo del repo, editable a mano o desde el panel.
 export const RUTA_CATEGORIAS = 'categorias.json';
 
-// Endpoint del panel de administración (lo resuelve el adaptador del hosting).
-export const API_ADMIN = '/api/admin';
+// Endpoints posibles del panel, en orden. El primero que conteste es el que
+// queda: el mismo panel anda en un hosting con PHP (donde los datos se
+// escriben en el disco) y en uno con Node, sin tocar una línea.
+export const API_ADMIN = ['api/admin.php', '/api/admin'];
 
 // Datos del negocio (se usan para armar links de WhatsApp)
 export const WHATSAPP = '5493416684947';

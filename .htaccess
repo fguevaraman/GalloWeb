@@ -1,0 +1,31 @@
+# Apache — hosting compartido. Es la única pieza atada al servidor web:
+# en otro (nginx, Netlify) se reemplaza por su equivalente.
+#
+# Todo va dentro de <IfModule>: si el hosting no tiene alguno de esos módulos,
+# esa parte se ignora y el sitio sigue andando. Un .htaccess con una directiva
+# que el servidor no conoce tira abajo el sitio entero con un error 500.
+
+# /admin en vez de /admin.html
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^admin/?$ admin.html [L]
+</IfModule>
+
+# El catálogo se revalida siempre: cuando el panel publica, el cambio tiene
+# que verse enseguida y no quedar cacheado en el navegador del cliente.
+<FilesMatch "\.json$">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </IfModule>
+</FilesMatch>
+
+<FilesMatch "\.(webp|jpg|jpeg|png|svg|woff2)$">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "public, max-age=604800"
+  </IfModule>
+</FilesMatch>
+
+# Nada de listar carpetas
+<IfModule mod_autoindex.c>
+  Options -Indexes
+</IfModule>

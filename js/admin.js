@@ -14,6 +14,7 @@ const MAX_IMG    = 3;
 const LADO_MAX   = 1200;   // px del lado más largo
 const CALIDAD    = 0.82;
 const CLAVE_TOKEN = 'gallo.sesion';
+const CLAVE_API   = 'gallo.api';
 
 const loginView = $('#login-view');
 const dashView  = $('#dash-view');
@@ -26,18 +27,44 @@ let imagenes  = [];        // del producto abierto: { ruta } o { blob, preview }
 
 // ---------- Llamadas a la API ----------
 
+// Prueba los endpoints hasta que uno conteste y se queda con ese. Un 404/405
+// significa "en este hosting el backend no es este", no un error del panel.
+let endpoint = sessionStorage.getItem(CLAVE_API) || null;
+
 async function api(cuerpo){
-  const respuesta = await fetch(API_ADMIN, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(cuerpo)
-  });
-  const datos = await respuesta.json().catch(() => ({}));
-  if(!respuesta.ok){
-    if(respuesta.status === 401 && cuerpo.accion !== 'login') cerrarSesion();
-    throw new Error(datos.error || `Error ${respuesta.status}`);
+  const candidatos = endpoint ? [endpoint] : API_ADMIN;
+  let ultimoFallo = null;
+
+  for(const url of candidatos){
+    let respuesta;
+    try{
+      respuesta = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cuerpo)
+      });
+    }catch(err){
+      ultimoFallo = err;
+      continue;
+    }
+
+    if(respuesta.status === 404 || respuesta.status === 405){
+      ultimoFallo = new Error(`El backend no está en ${url}.`);
+      continue;
+    }
+
+    endpoint = url;
+    sessionStorage.setItem(CLAVE_API, url);
+
+    const datos = await respuesta.json().catch(() => ({}));
+    if(!respuesta.ok){
+      if(respuesta.status === 401 && cuerpo.accion !== 'login') cerrarSesion();
+      throw new Error(datos.error || `Error ${respuesta.status}`);
+    }
+    return datos;
   }
-  return datos;
+
+  throw new Error(ultimoFallo?.message || 'No se pudo contactar al panel.');
 }
 
 // ---------- Sesión ----------
@@ -55,6 +82,21 @@ function cerrarSesion(){
   sessionStorage.removeItem(CLAVE_TOKEN);
   mostrarVista();
 }
+
+// Baja el catálogo entero como un archivo, para tener una copia propia
+// que no dependa del hosting.
+function descargarCopia(){
+  const copia = { fecha: new Date().toISOString(), categorias, productos };
+  const url = URL.createObjectURL(
+    new Blob([JSON.stringify(copia, null, 2)], { type:'application/json' }));
+  const enlace = document.createElement('a');
+  enlace.href = url;
+  enlace.download = `gallo-catalogo-${new Date().toISOString().slice(0, 10)}.json`;
+  enlace.click();
+  URL.revokeObjectURL(url);
+}
+
+$('#copia-btn').addEventListener('click', descargarCopia);
 
 $('#login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -173,7 +215,13 @@ async function publicar(mensajeExito, cats = null){
   if(Array.isArray(datos.categorias)) categorias = datos.categorias;
   llenarCombo();
   render();
-  estado(`${mensajeExito} El sitio público se actualiza en menos de un minuto.`, 'ok');
+
+  // Con el backend en PHP los datos se escriben en el disco del hosting y ya
+  // están publicados; con el adaptador de Node hay que esperar el deploy.
+  const alInstante = endpoint?.endsWith('.php');
+  estado(`${mensajeExito} ${alInstante
+    ? 'Ya está publicado en el sitio.'
+    : 'El sitio público se actualiza en menos de un minuto.'}`, 'ok');
 }
 
 async function eliminar(p){
