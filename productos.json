@@ -5,7 +5,11 @@
     "descripcion": "Bobinas\nBujías\nCables de Bujías\nPlatinos\nRotor Distribuidor\nTapa Distribuidor\nCondensador\nPulmón de avence",
     "precio": null,
     "categoria": "encendido",
-    "imagenes": []
+    "imagenes": [
+      "assets/productos/encendido-mub38eah-v03rr.webp",
+      "assets/productos/encendido-mub38eah-xtzng.webp",
+      "assets/productos/encendido-mub38eah-yyroc.webp"
+    ]
   },
   {
     "id": "b29b8d73-cf35-4542-a720-bd8f1733c027",
