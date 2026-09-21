@@ -1,13 +1,5 @@
 [
   {
-    "id": "43fa8dda-0af4-4bcf-a04e-4889b0ff4946",
-    "nombre": "Nuevo Producto",
-    "descripcion": "nueva descripcion del nuevo producto",
-    "precio": null,
-    "categoria": "frenos",
-    "imagenes": []
-  },
-  {
     "id": "86d58bcf-4d2b-47b9-9679-ab40322f64e0",
     "nombre": "Encendido",
     "descripcion": "Bobinas\nBujías\nCables de Bujías\nPlatinos\nRotor Distribuidor\nTapa Distribuidor\nCondensador\nPulmón de avence",
@@ -18,7 +10,7 @@
   {
     "id": "b29b8d73-cf35-4542-a720-bd8f1733c027",
     "nombre": "Bombas de agua Dolz",
-    "descripcion": "No se la descripcion, pero se puede poner algo",
+    "descripcion": "Linea completa en bombas de agua Dolz. Consultar stock de tu vehículo",
     "precio": null,
     "categoria": null,
     "imagenes": [
