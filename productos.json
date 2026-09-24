@@ -1,5 +1,16 @@
 [
   {
+    "id": "644fc2de-d6cc-42e7-a82b-e2864fcd0142",
+    "nombre": "Filtros",
+    "descripcion": "Filtro de combustible",
+    "precio": null,
+    "categoria": "filtros",
+    "imagenes": [
+      "assets/productos/filtros-mug3e9oc-mesff.webp",
+      "assets/productos/filtros-mug3e9oc-vjckd.webp"
+    ]
+  },
+  {
     "id": "86d58bcf-4d2b-47b9-9679-ab40322f64e0",
     "nombre": "Encendido",
     "descripcion": "Bobinas\nBujías\nCables de Bujías\nPlatinos\nRotor Distribuidor\nTapa Distribuidor\nCondensador\nPulmón de avence",
