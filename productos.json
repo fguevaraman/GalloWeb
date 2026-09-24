@@ -1,5 +1,17 @@
 [
   {
+    "id": "2f2d995c-0322-451f-99a3-97ad95fb0311",
+    "nombre": "Inyección",
+    "descripcion": "Inyectores - Reguladores de Presión de combustible - Bombas de combustible",
+    "precio": null,
+    "categoria": "inyeccion",
+    "imagenes": [
+      "assets/productos/inyeccion-mug40fvu-3mujc.webp",
+      "assets/productos/inyeccion-mug40fvu-0fup7.webp",
+      "assets/productos/inyeccion-mug40fvu-5om5x.webp"
+    ]
+  },
+  {
     "id": "516c6faf-821a-474c-bd8a-63c025db6137",
     "nombre": "Kit de distribución",
     "descripcion": "Para todos los modelos. Consultar disponibilidad",
