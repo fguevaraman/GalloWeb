@@ -1,5 +1,17 @@
 [
   {
+    "id": "adc4dc9c-f7b1-4075-8516-2f2adc5fc0b6",
+    "nombre": "Frenos",
+    "descripcion": "Pastillas de freno, Discos de freno, Liquido de frenos",
+    "precio": null,
+    "categoria": "frenos",
+    "imagenes": [
+      "assets/productos/frenos-mug3gcq4-g4mlb.webp",
+      "assets/productos/frenos-mug3gcq4-xl90a.webp",
+      "assets/productos/frenos-mug3gcq4-ddjim.webp"
+    ]
+  },
+  {
     "id": "644fc2de-d6cc-42e7-a82b-e2864fcd0142",
     "nombre": "Filtros",
     "descripcion": "Filtro de combustible",
