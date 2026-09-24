@@ -1,5 +1,15 @@
 [
   {
+    "id": "516c6faf-821a-474c-bd8a-63c025db6137",
+    "nombre": "Kit de distribución",
+    "descripcion": "Para todos los modelos. Consultar disponibilidad",
+    "precio": null,
+    "categoria": "distribucion",
+    "imagenes": [
+      "assets/productos/kit-de-distribucion-mug3r11r-8awc7.webp"
+    ]
+  },
+  {
     "id": "adc4dc9c-f7b1-4075-8516-2f2adc5fc0b6",
     "nombre": "Frenos",
     "descripcion": "Pastillas de freno, Discos de freno, Liquido de frenos",
