@@ -39,7 +39,7 @@
     "nombre": "Bombas de agua Dolz",
     "descripcion": "Linea completa en bombas de agua Dolz. Consultar stock de tu vehículo",
     "precio": null,
-    "categoria": null,
+    "categoria": "motor",
     "imagenes": [
       "assets/productos/bombas-de-agua-dolz-mu4hpmie-r2w4i.webp"
     ]
